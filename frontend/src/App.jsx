@@ -1,16 +1,18 @@
-
-import './App.css'
+import {BrowserRouter , Routes , Route} from 'react-router-dom';
+import FotografiyaLogin from './pages/Login';
 
 function App() {
 
   return (
-    <>
-      <div className='main h-screen p-10'>
-           <div className='flex flex-col justify-center border rounded-md shadow-xl h-full '>
-            <h1 className='text-2xl font-extralight font-serif tracking-widest text-center'>Hello Fotographia</h1>
-           </div>
-      </div>
+    <>   
+
+    <BrowserRouter>
+    <Routes>
+      <Route path="/" element={<FotografiyaLogin />}/>
     
+    </Routes>
+    </BrowserRouter>
+
     </>
   )
 }
