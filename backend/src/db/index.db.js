@@ -1,7 +1,11 @@
 import mongoose from 'mongoose';
 
 
-async function MongoDB(){
+
+
+
+
+export async function MongoDB(){
 
         try{
 

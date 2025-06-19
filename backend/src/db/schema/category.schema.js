@@ -16,10 +16,12 @@ const categorySchema = new mongoose.Schema({
         required : true
     }, // keeping this temporarily for now.
     unlockThreshhold: { type: Number ,required : true },
+
     images: [{
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Image'
     }],
+    
     createdAt: Date
 
 })
