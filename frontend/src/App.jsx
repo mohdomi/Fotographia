@@ -1,18 +1,22 @@
+import React from "react";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import Dashboard from "./pages/Dashboard";
+import FaceMatch from "./pages/FaceMatch";
+import Login from "./pages/Login";
 
-import './App.css'
 
 function App() {
-
   return (
-    <>
-      <div className='main h-screen p-10'>
-           <div className='flex flex-col justify-center border rounded-md shadow-xl h-full '>
-            <h1 className='text-2xl font-extralight font-serif tracking-widest text-center'>Hello Fotographia</h1>
-           </div>
-      </div>
-    
-    </>
-  )
+    <Router>
+      <Routes>
+        <Route path="/" element={<Login />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/dashboard/:section" element={<Dashboard />} />
+        <Route path="/face-match" element={<FaceMatch />} />
+      </Routes>
+    </Router>
+  );
 }
 
-export default App
+export default App;
