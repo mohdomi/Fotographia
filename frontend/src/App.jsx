@@ -1,23 +1,20 @@
-import Countdown from "./components/CountDown";
+import Countdown2 from "./components/CountDown";
+import {BrowserRouter , Routes , Route} from 'react-router-dom';
+import FotografiyaLogin from './pages/Login';
 
 function App() {
-  const baseDate = new Date("2025-06-19T00:00:00Z");
-  const months = 2;
-  const days = 15;
-  const hours = 4;
-  const minutes =60;
+  
+   return( <>   
 
-  return (
-    <div className="bg-gray-100 min-h-screen flex items-center justify-center">
-      <Countdown
-        baseDate={baseDate}
-        months={months}
-        days={days}
-        hours={hours}
-        minutes={minutes}
-      />
-    </div>
-  );
+    <BrowserRouter>
+    <Routes>
+      <Route path="/" element={<FotografiyaLogin />}/>
+      <Route path="/countodown" element={<Countdown2 />}/>
+    </Routes>
+    </BrowserRouter>
+
+    </>)
+
 }
 
 export default App;
