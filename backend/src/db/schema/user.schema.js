@@ -2,11 +2,18 @@ import mongoose from 'mongoose';
 
 const userSchema = new mongoose.Schema({
 	
-	pin : String,
-	weddingId : {
+	Userpin : {
+		type:String,
+		required:true
+	},
+
+
+	weddingId :{
 		type : mongoose.Schema.Types.ObjectId,
 		ref : "Wedding"
 	},
+
+
 	interactions: [
 		{
 			categoryId: {
@@ -27,6 +34,6 @@ const userSchema = new mongoose.Schema({
 
 })
 
-const User = mongoose.model('User' , userSchema);
+const User = mongoose.model('User123' , userSchema);
 export default User
 
