@@ -30,6 +30,12 @@ app.get("/hello",authmiddleware,(req,res)=>{
   });
 });
 
+app.get("/me" , (req,res)=>{
+  res.json({
+    hi : "hi there"
+  })
+})
+
 app.listen(process.env.PORT,()=>{
     console.log("app is listening on port:http://localhost:8080");
 })

@@ -52,8 +52,7 @@ const projectSchema = new mongoose.Schema({
     default: {}
   }
 
-    fz
-});
+})
 
 
 
