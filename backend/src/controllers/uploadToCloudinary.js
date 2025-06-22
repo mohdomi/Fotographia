@@ -77,13 +77,14 @@ export const uploadToS3 = async (file, folderPath, originalPath) => {
 
 
 // this function generates the folder structure in the server or storage bucket as same as that of the user side so nested folders could be structured correctly.
-const generateFolderPath = (categoryId, subfolder = '') => {
+const generateFolderPath = (categoryId, subfolder = '', baseUploadId = null) => {
+  if (subfolder) {
+    // For nested folders, preserve the exact structure without adding unique identifiers to each subfolder
+    return `uploads/${categoryId}/${baseUploadId}/${subfolder}`;
+  }
+  // Only generate unique identifier at the base level
   const timestamp = Date.now();
   const uniqueId = uuidv4().substring(0, 8);
-  
-  if (subfolder) {
-    return `uploads/${categoryId}/${subfolder}/${timestamp}_${uniqueId}`;
-  }
   return `uploads/${categoryId}/${timestamp}_${uniqueId}`;
 };
 
@@ -117,6 +118,11 @@ const mainUploadMethod = async (req, res) => {
 
     console.log(`Starting upload of ${req.files.length} files to ${uploadProvider}`);
 
+    // Generate a single base upload ID for this entire upload session
+    const timestamp = Date.now();
+    const uniqueId = uuidv4().substring(0, 8);
+    const baseUploadId = `${timestamp}_${uniqueId}`;
+
     // Process files with folder structure preservation
     const uploadPromises = req.files.map(async (file) => {
       try {
@@ -130,8 +136,15 @@ const mainUploadMethod = async (req, res) => {
             path.dirname(file.originalname) : '';
           
           if (originalPath) {
-            folderPath = generateFolderPath(sanitizedCategoryId, originalPath);
+            // Use the same baseUploadId for all files to maintain folder structure
+            folderPath = generateFolderPath(sanitizedCategoryId, originalPath, baseUploadId);
+          } else {
+            // For files in root, use the base folder with baseUploadId
+            folderPath = `uploads/${sanitizedCategoryId}/${baseUploadId}`;
           }
+        } else {
+          // For non-folder uploads, use the base folder with baseUploadId
+          folderPath = `uploads/${sanitizedCategoryId}/${baseUploadId}`;
         }
 
         // Upload based on provider

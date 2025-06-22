@@ -2,24 +2,20 @@ import express from "express"
 import dotenv from 'dotenv';
 import cookieParser from 'cookie-parser'
 import AdminRoute from "./src/routes/AdminRoute.js";
-import { MongoDB } from "./src/db/index.db.js";
+import { Mongoconnection } from "./src/db/index.db.js";
 import authmiddleware from "./src/middleware/Auth-middleware.js";
 import UserRoute from "./src/routes/UseRoute.js";
-import mongoose from "mongoose";
-const app = express();
+import cors from 'cors';
+
 dotenv.config();
+const app = express();
+
+// mongodb connection function
+Mongoconnection();
+
+// temporary cors implementation here.
+app.use(cors());
 app.use(express.json());
-
-mongoose.connect("mongodb://localhost:27017/WeddingPhotos")
-  .then(() => {
-    console.log("MongoDB connected");
-  })
-  .catch((err) => {
-    console.error("MongoDB connection error:", err);
-  });
-
-
-
 app.use(cookieParser());
 app.use("/api/v1/admin",AdminRoute);
 app.use("/api/v1/user",UserRoute);

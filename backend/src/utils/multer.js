@@ -6,8 +6,8 @@ import multer from 'multer';
 const upload = multer({
   storage: multer.memoryStorage(),
   limits: {
-    fileSize: 10 * 1024 * 1024, // 10MB per file
-    files: 100, // Maximum 100 files (current limitation because of memory constraints i guess we could scale this afterwards)
+    fileSize: 100 * 1024 * 1024, // 100MB per file
+    files: 1000, // Maximum 100 files (current limitation because of memory constraints i guess we could scale this afterwards)
   },
   fileFilter: (req, file, cb) => {
     // Here we can basically define the image type (Exclusively for the ai model)
