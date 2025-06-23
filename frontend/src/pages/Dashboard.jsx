@@ -197,8 +197,11 @@ const Dashboard = ({ section }) => {
     <div className="flex min-h-screen bg-[#f4f4f4] lg:flex-row flex-col">
       <aside className="w-full lg:w-[220px] bg-[#222] text-white flex flex-col lg:pt-6 lg:pb-6 lg:pl-0 lg:pr-0 lg:min-h-screen p-2 lg:p-0">
         <div className="flex items-center gap-3 font-['Pacifico'] text-base lg:text-[1.3rem] px-3 lg:px-6 pb-3 lg:pb-8">
-          <span>📸</span>
-          <span className="hidden md:block">Fotographiya</span>
+          <img 
+            src="/logo.png" 
+            alt="Fotographiya Logo" 
+            className="h-8 lg:h-10 w-auto object-contain"
+          />
         </div>
         <nav className="flex flex-row lg:flex-col gap-1 lg:gap-2 px-2 lg:px-3 overflow-x-auto lg:overflow-visible scrollbar-hide pb-2 lg:pb-0">
           <a 

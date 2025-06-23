@@ -36,9 +36,12 @@ const Login = () => {
             className="w-full h-full bg-gradient-to-br from-purple-600 via-pink-500 to-orange-400 hidden items-center justify-center"
             style={{ minHeight: '200px' }}
           >
-            <div className="text-center text-white">
-              <div className="text-4xl lg:text-6xl mb-4">📸</div>
-              <div className="text-lg lg:text-xl font-semibold">Fotographiya</div>
+            <div className="text-center">
+              <img 
+                src="/logo.png" 
+                alt="Fotographiya Logo" 
+                className="h-16 lg:h-20 w-auto object-contain"
+              />
             </div>
           </div>
           <div className="absolute inset-0 bg-black bg-opacity-20"></div>
@@ -47,11 +50,12 @@ const Login = () => {
         {/* Right Side - Login Form */}
         <div className="lg:flex-1 p-6 sm:p-8 lg:p-12 flex flex-col justify-center">
           {/* Logo */}
-          <div className="flex items-center gap-3 mb-8 lg:mb-12">
-            <div className="w-8 sm:w-10 h-8 sm:h-10 bg-black rounded-full flex items-center justify-center">
-              <span className="text-white text-lg sm:text-xl">📸</span>
-            </div>
-            <span className="text-xl sm:text-2xl font-bold text-black">Fotographiya</span>
+          <div className="flex items-center mb-8 lg:mb-12">
+            <img 
+              src="/logo.png" 
+              alt="Fotographiya Logo" 
+              className="h-8 sm:h-10 w-auto object-contain"
+            />
           </div>
 
           {/* Welcome Text */}

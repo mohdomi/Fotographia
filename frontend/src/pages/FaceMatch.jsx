@@ -191,8 +191,11 @@ const FaceMatch = () => {
       {/* Sidebar */}
       <aside className="w-full lg:w-[220px] bg-[#222] text-white flex flex-col lg:pt-6 lg:pb-6 lg:pl-0 lg:pr-0 lg:min-h-screen p-3 lg:p-0">
         <div className="flex items-center gap-3 font-['Pacifico'] text-lg lg:text-[1.3rem] px-3 lg:px-6 pb-4 lg:pb-8">
-          <span>📸</span>
-          <span className="hidden sm:block">Fotographiya</span>
+          <img 
+            src="/logo.png" 
+            alt="Fotographiya Logo" 
+            className="h-8 lg:h-10 w-auto object-contain"
+          />
         </div>
         <nav className="flex flex-row lg:flex-col gap-2 px-0 lg:px-3 overflow-x-auto lg:overflow-visible">
           <a 
