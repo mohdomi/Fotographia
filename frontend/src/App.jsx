@@ -1,8 +1,9 @@
+
+import React from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Dashboard from "./pages/Dashboard";
 import FaceMatch from "./pages/FaceMatch";
 import Login from "./pages/Login";
-import FolderUploadComponent from "./pages/FileUploadDemo";
 
 
 function App() {
@@ -14,7 +15,6 @@ function App() {
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/dashboard/:section" element={<Dashboard />} />
         <Route path="/face-match" element={<FaceMatch />} />
-        <Route path="/folder-upload" element={<FolderUploadComponent />} />
       </Routes>
     </Router>
   );
