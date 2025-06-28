@@ -3,7 +3,7 @@ import {AdminSignup,AdminSignin,createProject} from "../controllers/Admin-auth.j
 import authmiddleware  from "../middleware/Auth-middleware.js";
 const route= Router();
 
-//route.post("/admsignup",AdminSignup);
+route.post("/admsignup",AdminSignup);
 
 route.post("/admsignin",AdminSignin);
 route.post("/create-project",authmiddleware,createProject);

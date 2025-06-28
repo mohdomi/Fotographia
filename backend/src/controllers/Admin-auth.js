@@ -5,10 +5,11 @@ import { calculateCountdownDuration } from '../utils/countdownUtils.js';
 
 import Projects from '../db/schema/project.schema.js';
 import User from '../db/schema/user.js';
+import ClientUser from '../db/schema/user.schema.js';
 
 
 
-export const AdminSignup =  async(req,res,next)=>{
+export const AdminSignup =  async(req,res)=>{
 
          const {password}=req.body;
 
@@ -16,15 +17,14 @@ if(validatePassword(password)){
 
 const user = await User.create({
      password,
-     role:"admin",
+     role:"MainAdmin",
 });
 
 
 
- res.json({
+ return res.json({
     user:user
 });
-next();
 
 }else{
     return res.json({
@@ -34,7 +34,7 @@ next();
 
 }
 
- export const AdminSignin = async (req,res,next)=>{
+export const AdminSignin = async (req,res,next)=>{
     const {password}=req.body;
     if(!password){
         return res.json({
@@ -48,7 +48,7 @@ next();
 
    if(!AdminUser) return res.json({message:"Admin doesn't exist"});
    
-   const token=jwt.sign({role:AdminUser.role},"sachinjha"); 
+   const token=jwt.sign({role:AdminUser.role,id:AdminUser._id},"sachinjha"); 
 
   res.cookie("token", token, {
     httpOnly: true,
@@ -58,11 +58,10 @@ next();
 });
 
 
-res.json({
+return res.json({
     user:AdminUser,
     message:"Admin loggedin successfully"
 })
-next();
 }
 
 
@@ -71,12 +70,15 @@ next();
 
 export const createProject = async (req, res) => {
   try {
+    const id= await req.id;
     const {
       wedding_name,
       dueDate,
       estimatedDays,
       Mobile_Number,
       Userpin,
+      wedding_face,
+      wedding_img
     } = req.body;
 
     if(!validatePassword(Userpin)) return res.json({message:"weak Password"});
@@ -93,15 +95,33 @@ export const createProject = async (req, res) => {
       months,
       days,
       hours,
-      minutes
+      minutes,
+      AdminUserId:id,
+      wedding_face,
+      wedding_img,
       
     });
+    
+  
+  //Reflect the changes in AdminUser projects array that counts how many projects have admin
+    
 
+   const clientUser= new ClientUser({
+      Userpin,
+      weddingId:newProject._id,
+    });
+   
     const saved = await newProject.save();
+    const savedclient = await clientUser.save();
 
+await User.updateMany(
+  { _id: { $in:saved.AdminUserId } },
+  { $push: { projects:saved._id } }
+);
     res.status(201).json({
       message: "Project created with countdown",
-      data: saved
+      Project: saved,
+      savedclient
     });
   } catch (error) {
     res.status(500).json({
