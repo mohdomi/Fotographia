@@ -10,10 +10,33 @@ const imageSchema = new mongoose.Schema({
     categoryId : {
         type : mongoose.Schema.Types.ObjectId,
         ref : 'Category',
-        required : true
+        // required : true // temporarily commenting this out because of frontend schema 
+    },
+    weddingId : {
+        type : mongoose.Schema.Types.ObjectId,
+        ref : 'Wedding',
+        required : false
+    },
+    folderPath : {
+        type : String,
+        required : false
+    },
+    originalName : {
+        type : String,
+        required : false
+    },
+    // this is the key created from the uuid + date url.
+    key : {
+        type : String,
+        required : false
+    },
+    size : {
+        type : Number,
+        required : false
     },
     uploadedAt : {
-        type : Date
+        type : Date,
+        default : Date.now
     }
 
 })

@@ -12,16 +12,9 @@ const Login = () => {
       // Add authentication logic here
       console.log('PIN:', pin);
       navigate('/dashboard');
-<<<<<<< HEAD
 
     }
-    } 
-
-=======
-    }
-  };
->>>>>>> 028c7cc43012e4980aab5f9a0735277e1c4f0eb1
-
+  } 
   return (
     <>
     <div className="min-h-screen bg-white flex items-center justify-center p-2 sm:p-4">
@@ -121,7 +114,6 @@ const Login = () => {
               Continue
             </button>
           </form>
-<<<<<<< HEAD
          
      </div>
      </div>
@@ -140,12 +132,3 @@ export default Login;
 
  
 
-=======
-        </div>
-      </div>
-    </div>
-  );
-};
-
-export default Login;
->>>>>>> 028c7cc43012e4980aab5f9a0735277e1c4f0eb1

@@ -4,6 +4,7 @@ import s3Client from '../utils/awsS3.js';
 import { createPresignedPost } from '@aws-sdk/s3-presigned-post';
 import path from 'path';
 import { v4 as uuidv4 } from 'uuid';
+import Image from '../db/schema/image.schema.js'; // Import the Image model
 
 
 // this function generates the folder structure in the server or storage bucket as same as that of the user side so nested folders could be structured correctly.
@@ -19,6 +20,7 @@ const generateFolderPath = (categoryId, subfolder = '', baseUploadId = null) => 
 };
 
 // File validation function (enhanced from first approach)
+// this is actually added because of the ai team so we could add images with the correct mime type
 const validateFile = (fileInfo) => {
   const allowedMimes = [
     'image/jpeg',
@@ -88,7 +90,7 @@ const generatePresignedUrls = async (req, res) => {
       });
     }
 
-    // File count validation (enhanced limits)
+    // File count validation (enhanced limits) this could be changed.
     if (files.length > 1000) {
       return res.status(400).json({
         success: false,
@@ -143,7 +145,7 @@ const generatePresignedUrls = async (req, res) => {
         const fileExtension = path.extname(sanitizedFileName);
         const baseName = path.basename(sanitizedFileName, fileExtension);
         const uniqueFileName = `${baseName}_${Date.now()}_${index}${fileExtension}`;
-        const key = `${folderPath}/${uniqueFileName}`;
+        const key = `${folderPath}/${uniqueFileName}`; // path address for the file.
 
         // Create comprehensive pre-signed POST URL with enhanced metadata
         const presignedPost = await createPresignedPost(s3Client, {
@@ -160,7 +162,7 @@ const generatePresignedUrls = async (req, res) => {
             'x-amz-meta-file-index': index.toString(),
           },
           Conditions: [
-            ['content-length-range', 0, 100 * 1024 * 1024], // 100MB max
+            ['content-length-range', 0, 100 * 1024 * 1024], // 100MB max this can also be change by us for increasing decreasing file size
             ['eq', '$Content-Type', fileInfo.type],
             ['starts-with', '$x-amz-meta-original-name', ''],
           ],
@@ -258,7 +260,7 @@ const handleUploadComplete = async (req, res) => {
   try {
     const {
       uploadSessionId,
-      files, // Array of completed file info: [{ key, originalName, finalUrl, status, size, etag }]
+      files, // Array of completed file info: [{ key, originalName, finalUrl, status, size, etag, folderPath, weddingId }]
       categoryId,
       metadata = {}
     } = req.body;
@@ -334,6 +336,22 @@ const handleUploadComplete = async (req, res) => {
     await storeUploadSession(uploadSession);
     await storeFileMetadata(successfulFiles);
     */
+
+    // Store image details and URLs in MongoDB for successful files
+    if (successfulFiles.length > 0) {
+      const imageDocs = successfulFiles.map(file => ({
+        url: file.finalUrl,
+        categoryId: categoryId,
+        weddingId: file.weddingId || undefined,
+        folderPath: file.folderPath || undefined,
+        originalName: file.originalName || undefined,
+        key: file.key || undefined,
+        size: file.actualSize || file.size || undefined,
+        uploadedAt: file.lastModified ? new Date(file.lastModified) : new Date(),
+      }));
+      console.log(imageDocs)
+      await Image.insertMany(imageDocs);
+    }
 
     // Enhanced response (from first approach style)
     res.json({
