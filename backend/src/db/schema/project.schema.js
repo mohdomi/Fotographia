@@ -59,12 +59,16 @@ const projectSchema = new mongoose.Schema({
     default: {}
     }],
 
+<<<<<<< HEAD
 wedding_img: [{
   type: Map,
   of: [String],
   default: {}
 }]
 });
+=======
+})
+>>>>>>> 028c7cc43012e4980aab5f9a0735277e1c4f0eb1
 
 
 
