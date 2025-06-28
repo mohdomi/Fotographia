@@ -3,9 +3,9 @@ import bcrypt from 'bcryptjs'
 import validatePassword from '../utils/ValidatePass.js';
 import { calculateCountdownDuration } from '../utils/countdownUtils.js';
 
-import Projects from '../db/schema/project.schema.js';
-import User from '../db/schema/user.js';
-import ClientUser from '../db/schema/user.schema.js';
+import Projects from '../models/project.schema.js';
+import User from '../models/user.js';
+import ClientUser from '../models/user.schema.js';
 
 
 
