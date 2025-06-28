@@ -4,7 +4,7 @@ import s3Client from '../utils/awsS3.js';
 import { createPresignedPost } from '@aws-sdk/s3-presigned-post';
 import path from 'path';
 import { v4 as uuidv4 } from 'uuid';
-import Image from '../db/schema/image.schema.js'; // Import the Image model
+import Image from '../models/image.schema.js'; // Import the Image model
 
 
 // this function generates the folder structure in the server or storage bucket as same as that of the user side so nested folders could be structured correctly.

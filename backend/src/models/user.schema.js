@@ -10,9 +10,17 @@ const userSchema = new mongoose.Schema({
 
 	weddingId :{
 		type : mongoose.Schema.Types.ObjectId,
-		ref : "Wedding"
+		ref : "Projects"
 	},
 
+  Access: [{
+    email: String,
+    role: {
+      type: String,
+      enum: ['admin', 'viewer'],
+      default: 'viewer'
+    }
+  }],
 
 	interactions: [
 		{
@@ -34,6 +42,6 @@ const userSchema = new mongoose.Schema({
 
 })
 
-const User = mongoose.model('User123' , userSchema);
-export default User
+const ClientUser = mongoose.model('ClientUser' , userSchema);
+export default ClientUser
 
