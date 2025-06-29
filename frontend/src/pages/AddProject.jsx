@@ -189,45 +189,7 @@ const AddProject = () => {
 
   return (
     <div className="flex min-h-screen bg-[#f4f4f4] lg:flex-row flex-col">
-      {/* Sidebar */}
-      <aside className="w-full lg:w-[220px] bg-[#222] text-white flex flex-col lg:pt-6 lg:pb-6 lg:pl-0 lg:pr-0 lg:min-h-screen p-3 lg:p-0">
-        <div className="flex items-center gap-3 font-['Pacifico'] text-lg lg:text-[1.3rem] px-3 lg:px-6 pb-4 lg:pb-8">
-          <span>📸</span>
-          <span className="hidden sm:block">Fotographiya</span>
-        </div>
-        <nav className="flex flex-row lg:flex-col gap-2 px-0 lg:px-3 overflow-x-auto lg:overflow-visible">
-          <a 
-            href="#" 
-            className="text-white no-underline py-2 lg:py-3 px-3 lg:px-[18px] rounded-lg text-sm lg:text-[1.08rem] flex items-center gap-2 lg:gap-[10px] transition-all duration-200 hover:bg-white hover:text-[#181818] whitespace-nowrap"
-            onClick={() => navigate('/dashboard')}
-          >
-            <span>🏠</span> <span className="hidden sm:block">Dashboard</span>
-          </a>
-          <a 
-            href="#" 
-            className="text-white no-underline py-2 lg:py-3 px-3 lg:px-[18px] rounded-lg text-sm lg:text-[1.08rem] flex items-center gap-2 lg:gap-[10px] transition-all duration-200 hover:bg-white hover:text-[#181818] whitespace-nowrap"
-            onClick={() => navigate('/dashboard/pending')}
-          >
-            <span>⏳</span> <span className="hidden sm:block">Pending</span>
-          </a>
-          <a 
-            href="#" 
-            className="text-white no-underline py-2 lg:py-3 px-3 lg:px-[18px] rounded-lg text-sm lg:text-[1.08rem] flex items-center gap-2 lg:gap-[10px] transition-all duration-200 hover:bg-white hover:text-[#181818] whitespace-nowrap"
-            onClick={() => navigate('/dashboard/current')}
-          >
-            <span>📂</span> <span className="hidden sm:block">Current</span>
-          </a>
-          <a 
-            href="#" 
-            className="text-white no-underline py-2 lg:py-3 px-3 lg:px-[18px] rounded-lg text-sm lg:text-[1.08rem] flex items-center gap-2 lg:gap-[10px] transition-all duration-200 hover:bg-white hover:text-[#181818] whitespace-nowrap"
-            onClick={() => navigate('/dashboard/completed')}
-          >
-            <span>✅</span> <span className="hidden sm:block">Completed</span>
-          </a>
-        </nav>
-      </aside>
-
-      {/* Main Content */}
+      <Sidebar currentSection="face-match" />
       <main className="flex-1 p-4 lg:pt-8 lg:pr-8 lg:pb-8 lg:pl-0 flex flex-col">
         {/* Form Content */}
         <section className="bg-white rounded-xl lg:rounded-b-xl p-4 lg:p-8 shadow-[0_2px_16px_rgba(0,0,0,0.08)]">

@@ -97,71 +97,54 @@ const Dashboard = () => {
     { label: 'Completed projects', value: completedProjects.length },
   ];
 
-  return (
-    <div className="flex min-h-screen bg-[#f4f4f4] lg:flex-row flex-col">
-      <aside className="w-full lg:w-[220px] bg-[#222] text-white flex flex-col lg:pt-6 lg:pb-6 lg:pl-0 lg:pr-0 lg:min-h-screen p-2 lg:p-0">
-        <div className="flex items-center gap-3 font-['Pacifico'] text-base lg:text-[1.3rem] px-3 lg:px-6 pb-3 lg:pb-8">
-          <span>📸</span>
-          <span className="hidden md:block">Fotographiya</span>
-        </div>
-        <nav className="flex flex-row lg:flex-col gap-1 lg:gap-2 px-2 lg:px-3 overflow-x-auto lg:overflow-visible scrollbar-hide pb-2 lg:pb-0">
-          <a 
-            href="#" 
-            className={`text-white no-underline py-2 lg:py-3 px-3 sm:px-4 lg:px-[18px] rounded-lg text-xs sm:text-sm lg:text-[1.08rem] flex items-center gap-1 sm:gap-2 lg:gap-[10px] hover:bg-white hover:text-[#181818] whitespace-nowrap min-w-max transition-colors duration-150 ${currentSection === 'dashboard' ? 'bg-white text-[#181818]' : ''}`}
-            onClick={() => handleNav('dashboard')}
-          >
-            <span className="text-sm lg:text-base">🏠</span> 
-            <span className="hidden sm:inline lg:inline">Dashboard</span>
-          </a>
-          <a 
-            href="#" 
-            className={`text-white no-underline py-2 lg:py-3 px-3 sm:px-4 lg:px-[18px] rounded-lg text-xs sm:text-sm lg:text-[1.08rem] flex items-center gap-1 sm:gap-2 lg:gap-[10px] hover:bg-white hover:text-[#181818] whitespace-nowrap min-w-max transition-colors duration-150 ${currentSection === 'pending' ? 'bg-white text-[#181818]' : ''}`}
-            onClick={() => handleNav('pending')}
-          >
-            <span className="text-sm lg:text-base">⏳</span> 
-            <span className="hidden sm:inline lg:inline">Pending</span>
-          </a>
-          <a 
-            href="#" 
-            className={`text-white no-underline py-2 lg:py-3 px-3 sm:px-4 lg:px-[18px] rounded-lg text-xs sm:text-sm lg:text-[1.08rem] flex items-center gap-1 sm:gap-2 lg:gap-[10px] hover:bg-white hover:text-[#181818] whitespace-nowrap min-w-max transition-colors duration-150 ${currentSection === 'current' ? 'bg-white text-[#181818]' : ''}`}
-            onClick={() => handleNav('current')}
-          >
-            <span className="text-sm lg:text-base">📂</span> 
-            <span className="hidden sm:inline lg:inline">Current</span>
-          </a>
-          <a 
-            href="#" 
-            className={`text-white no-underline py-2 lg:py-3 px-3 sm:px-4 lg:px-[18px] rounded-lg text-xs sm:text-sm lg:text-[1.08rem] flex items-center gap-1 sm:gap-2 lg:gap-[10px] hover:bg-white hover:text-[#181818] whitespace-nowrap min-w-max transition-colors duration-150 ${currentSection === 'completed' ? 'bg-white text-[#181818]' : ''}`}
-            onClick={() => handleNav('completed')}
-          >
-            <span className="text-sm lg:text-base">✅</span> 
-            <span className="hidden sm:inline lg:inline">Completed</span>
-          </a>
-        </nav>
-      </aside>
-      <main className="flex-1 p-4 lg:pt-8 lg:pr-8 lg:pb-8 lg:pl-0 flex flex-col">
-        <header className="flex flex-col sm:flex-row justify-between items-center bg-white py-4 lg:py-[18px] px-4 lg:px-8 rounded-xl lg:rounded-t-xl shadow-[0_2px_8px_rgba(0,0,0,0.06)] mb-4 lg:mb-[18px] gap-4 sm:gap-0">
-          <div className="flex-1 w-full sm:w-auto">
-            <input 
-              type="text" 
-              placeholder="Search ..." 
-              className="py-[10px] px-[18px] rounded-lg border-[1.5px] border-[#ccc] text-base w-full sm:w-[220px]"
+  // Filter projects based on search query
+  const filterProjects = (projects) => {
+    if (!searchQuery) return projects;
+    return projects.filter(project => 
+      project.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      project.pkg.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      project.mobile.includes(searchQuery)
+    );
+  };
+
+  const renderContent = () => {
+    switch (currentSection) {
+      case 'pending':
+        return (
+          <>
+            <h2 className="text-xl lg:text-[2rem] mb-4 lg:mb-6 font-['Montserrat']">Pending Projects</h2>
+            <ProjectTable 
+              title="Pending" 
+              projects={filterProjects(pendingProjects)}
+              onDelete={(index) => handleDelete('pending', index)}
             />
-          </div>
-          <div className="flex items-center gap-3 lg:gap-[18px] w-full sm:w-auto justify-center sm:justify-end">
-            <button 
-              className="bg-[#181818] text-white border-none rounded-lg py-[10px] px-4 lg:px-[18px] text-sm lg:text-base font-medium cursor-pointer hover:bg-[#444] flex-1 sm:flex-none"
-              type="button" 
-              onClick={() => navigate('/face-match')}
-            >
-              <span className="sm:hidden">+</span>
-              <span className="hidden sm:inline">+ Add project</span>
-            </button>
-            <span className="text-xl lg:text-2xl cursor-pointer">🔔</span>
-          </div>
-        </header>
-        <section className="bg-white rounded-xl lg:rounded-b-xl p-4 lg:p-8 shadow-[0_2px_16px_rgba(0,0,0,0.08)]">
-          {(!currentSection || currentSection === 'dashboard') && <>
+          </>
+        );
+      case 'current':
+        return (
+          <>
+            <h2 className="text-xl lg:text-[2rem] mb-4 lg:mb-6 font-['Montserrat']">Current Projects</h2>
+            <ProjectTable 
+              title="Current" 
+              projects={filterProjects(currentProjects)}
+              onDelete={(index) => handleDelete('current', index)}
+            />
+          </>
+        );
+      case 'completed':
+        return (
+          <>
+            <h2 className="text-xl lg:text-[2rem] mb-4 lg:mb-6 font-['Montserrat']">Completed Projects</h2>
+            <ProjectTable 
+              title="Completed" 
+              projects={filterProjects(completedProjects)}
+              onDelete={(index) => handleDelete('completed', index)}
+            />
+          </>
+        );
+      default:
+        return (
+          <>
             <h2 className="text-xl lg:text-[2rem] mb-4 lg:mb-6 font-['Montserrat']">Dashboard</h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:flex lg:gap-6 gap-3 lg:gap-6 mb-6 lg:mb-8">
               {stats.map((s, i) => (
