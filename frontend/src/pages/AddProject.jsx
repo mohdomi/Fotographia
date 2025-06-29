@@ -1,7 +1,8 @@
 import React, { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
+import Sidebar from '../components/Sidebar';
 
-const FaceMatch = () => {
+const AddProject = () => {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
     weddingName: '',
@@ -188,47 +189,8 @@ const FaceMatch = () => {
 
   return (
     <div className="flex min-h-screen bg-[#f4f4f4] lg:flex-row flex-col">
-      {/* Sidebar */}
-      <aside className="w-full lg:w-[220px] bg-[#222] text-white flex flex-col lg:pt-6 lg:pb-6 lg:pl-0 lg:pr-0 lg:min-h-screen p-3 lg:p-0">
-        <div className="flex items-center gap-3 font-['Pacifico'] text-lg lg:text-[1.3rem] px-3 lg:px-6 pb-4 lg:pb-8">
-          <span>📸</span>
-          <span className="hidden sm:block">Fotographiya</span>
-        </div>
-        <nav className="flex flex-row lg:flex-col gap-2 px-0 lg:px-3 overflow-x-auto lg:overflow-visible">
-          <a 
-            href="#" 
-            className="text-white no-underline py-2 lg:py-3 px-3 lg:px-[18px] rounded-lg text-sm lg:text-[1.08rem] flex items-center gap-2 lg:gap-[10px] transition-all duration-200 hover:bg-white hover:text-[#181818] whitespace-nowrap"
-            onClick={() => navigate('/dashboard')}
-          >
-            <span>🏠</span> <span className="hidden sm:block">Dashboard</span>
-          </a>
-          <a 
-            href="#" 
-            className="text-white no-underline py-2 lg:py-3 px-3 lg:px-[18px] rounded-lg text-sm lg:text-[1.08rem] flex items-center gap-2 lg:gap-[10px] transition-all duration-200 hover:bg-white hover:text-[#181818] whitespace-nowrap"
-            onClick={() => navigate('/dashboard/pending')}
-          >
-            <span>⏳</span> <span className="hidden sm:block">Pending</span>
-          </a>
-          <a 
-            href="#" 
-            className="text-white no-underline py-2 lg:py-3 px-3 lg:px-[18px] rounded-lg text-sm lg:text-[1.08rem] flex items-center gap-2 lg:gap-[10px] transition-all duration-200 hover:bg-white hover:text-[#181818] whitespace-nowrap"
-            onClick={() => navigate('/dashboard/current')}
-          >
-            <span>📂</span> <span className="hidden sm:block">Current</span>
-          </a>
-          <a 
-            href="#" 
-            className="text-white no-underline py-2 lg:py-3 px-3 lg:px-[18px] rounded-lg text-sm lg:text-[1.08rem] flex items-center gap-2 lg:gap-[10px] transition-all duration-200 hover:bg-white hover:text-[#181818] whitespace-nowrap"
-            onClick={() => navigate('/dashboard/completed')}
-          >
-            <span>✅</span> <span className="hidden sm:block">Completed</span>
-          </a>
-        </nav>
-      </aside>
-
-      {/* Main Content */}
+      <Sidebar currentSection="face-match" />
       <main className="flex-1 p-4 lg:pt-8 lg:pr-8 lg:pb-8 lg:pl-0 flex flex-col">
-        
         {/* Form Content */}
         <section className="bg-white rounded-xl lg:rounded-b-xl p-4 lg:p-8 shadow-[0_2px_16px_rgba(0,0,0,0.08)]">
           <h2 className="text-xl lg:text-[2rem] mb-6 font-['Montserrat'] text-white bg-[#181818] py-3 lg:py-4 px-4 lg:px-6 rounded-lg -mt-4 lg:-mt-8 -mx-4 lg:-mx-8 mb-6 lg:mb-8">Add project</h2>
@@ -282,7 +244,7 @@ const FaceMatch = () => {
                   <span>💾 Saved to browser storage</span>
                 </div>
               </div>
-                              <div 
+              <div 
                 className="border-2 border-dashed border-gray-300 rounded-lg p-4 sm:p-8 text-center bg-gray-50"
                 onDragOver={handleDragOver}
                 onDrop={handleDrop}
@@ -378,8 +340,6 @@ const FaceMatch = () => {
               )}
             </div>
 
-           
-
             {/* Due Date and Estimated Time */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
@@ -413,10 +373,6 @@ const FaceMatch = () => {
               </div>
             </div>
 
-           
-
-           
-
             {/* Terms and Conditions */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">Terms and Conditions</label>
@@ -428,7 +384,6 @@ const FaceMatch = () => {
               >
                 <option value="">Select terms and Conditions</option>
                 <option value="accepted">I accept terms and conditions</option>
-               
               </select>
             </div>
 
@@ -453,4 +408,4 @@ const FaceMatch = () => {
   );
 };
 
-export default FaceMatch; 
+export default AddProject; 
