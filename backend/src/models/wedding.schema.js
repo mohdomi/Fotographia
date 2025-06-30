@@ -1,7 +1,7 @@
 import mongoose from 'mongoose';
 
 
-const weddingSchema  = new mongoose.Schema ({
+const weddingSchema  = new mongoose.Schema({
 
     name : {
         type : String,
@@ -23,7 +23,7 @@ const weddingSchema  = new mongoose.Schema ({
         required : true
     }
 
-});
+})
 
 
 const Wedding = mongoose.model('Wedding' , weddingSchema);

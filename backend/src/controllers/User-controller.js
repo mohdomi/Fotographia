@@ -1,6 +1,6 @@
-import Projects from "../db/schema/project.schema.js"
-import ClientUser from "../db/schema/user.schema.js";
-import User from "../db/schema/user.schema.js"
+import Projects from "../models/project.schema.js"
+import ClientUser from "../models/user.schema.js";
+import User from "../models/user.schema.js"
 import jwt from 'jsonwebtoken'
 import AccessUser from "../db/schema/AccessUser.js";
 
