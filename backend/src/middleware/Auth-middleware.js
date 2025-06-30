@@ -10,6 +10,7 @@ const authmiddleware = async (req, res, next) => {
 
     const decodedvalue = jwt.verify(token, "sachinjha");
     req.role = decodedvalue?.role;
+    req.id=decodedvalue?.id;
     next();
   } catch (error) {
     return res.status(500).json({ message: "Internal server error" });

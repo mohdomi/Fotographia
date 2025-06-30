@@ -1,4 +1,4 @@
-import mongoose from "mongoose";
+import mongoose, { Mongoose } from "mongoose";
 
 
 const projectSchema = new mongoose.Schema({
@@ -42,17 +42,28 @@ const projectSchema = new mongoose.Schema({
         type: String,
         trim: true
     },
-    wedding_face: {
-        type: String,
-        default:""
-    },
-    wedding_img: {
+    AdminUserId:[{
+          type : mongoose.Schema.Types.ObjectId,
+            ref : "User"
+    }]
+    ,
+
+    ClientUserId:[{
+    type : mongoose.Schema.Types.ObjectId,
+    ref : "ClientUser"
+    }],
+
+    wedding_face: [{
     type: Map,
     of: [String], 
     default: {}
-  }
+    }],
 
-    fz
+wedding_img: [{
+  type: Map,
+  of: [String],
+  default: {}
+}]
 });
 
 

@@ -13,10 +13,15 @@ const Login = () => {
       // Add authentication logic here
       console.log('PIN:', pin);
       navigate('/dashboard');
+
     }
   };
 
+
+    }
+  } 
   return (
+    <>
     <div className="min-h-screen bg-white flex items-center justify-center p-2 sm:p-4">
       {/* Login Card */}
       <div className="bg-white rounded-lg sm:rounded-[20px] shadow-2xl overflow-hidden max-w-4xl w-full flex flex-col lg:flex-row">
@@ -106,6 +111,7 @@ const Login = () => {
               Continue
             </button>
           </form>
+
         </div>
       </div>
     </div>
@@ -113,3 +119,8 @@ const Login = () => {
 };
 
 export default Login; 
+         
+     
+    
+
+          
