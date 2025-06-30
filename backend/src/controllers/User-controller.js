@@ -1,8 +1,8 @@
 import Projects from "../models/project.schema.js"
 import ClientUser from "../models/user.schema.js";
-import User from "../models/user.schema.js"
+//import User from "../models/user.js"
 import jwt from 'jsonwebtoken'
-import AccessUser from "../db/schema/AccessUser.js";
+import AccessUser from "../models/AccessUser.js";
 
 export const Userlogin = async(req,res)=>{
     const {pin}=req.body;
@@ -30,7 +30,7 @@ res.json({
 }
 
 export const getUser=async(req,res)=>{
-    const user =await User.findOne({
+    const user =await ClientUser.findOne({
         _id:req.id
     })
 if(!user) return res.json({message:"user not found"});
@@ -43,7 +43,7 @@ export const GetImages=async(req,res)=>{
 const id=await req.id;
 console.log(id);
 
-const user= await User.findOne({
+const user= await ClientUser.findOne({
     _id:id
 });
 
@@ -79,7 +79,7 @@ export const addAccess = async (req, res) => {
 
     // Find the target user
     console.log(userId);
-    const user = await User.findById(userId);
+    const user = await ClientUser.findById(userId);
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
@@ -99,7 +99,7 @@ export const addAccess = async (req, res) => {
     });
 
     // Add to user's accessList
-    await User.findByIdAndUpdate(userId, {
+    await ClientUser.findByIdAndUpdate(userId, {
       $addToSet: { Access: accessUser._id }
     });
 
