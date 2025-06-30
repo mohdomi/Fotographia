@@ -9,7 +9,13 @@ import cors from 'cors';
 
 
 const app = express();
-app.use(cors());
+
+const allowedOrigins = ['http://localhost:5173'];
+app.use(cors({
+  origin: allowedOrigins,
+  credentials: true 
+}));
+
 dotenv.config();
 app.use(express.json());
 

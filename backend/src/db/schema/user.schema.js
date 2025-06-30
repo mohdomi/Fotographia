@@ -14,12 +14,8 @@ const userSchema = new mongoose.Schema({
 	},
 
   Access: [{
-    email: String,
-    role: {
-      type: String,
-      enum: ['admin', 'viewer'],
-      default: 'viewer'
-    }
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'AccessUser'
   }],
 
 	interactions: [

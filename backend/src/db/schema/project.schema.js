@@ -53,18 +53,18 @@ const projectSchema = new mongoose.Schema({
     ref : "ClientUser"
     }],
 
-    wedding_face: [{
-    type: Map,
-    of: [String], 
-    default: {}
-    }],
-
-wedding_img: [{
+   wedding_face: {
   type: Map,
   of: [String],
   default: {}
-}]
-});
+},
+
+ wedding_img: {
+  type: Map,
+  of: [String],
+  default: {}
+}
+ });
 
 
 

@@ -2,9 +2,24 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Dashboard from "./pages/Dashboard";
 import FaceMatch from "./pages/FaceMatch";
 import Login from "./pages/Login";
+import ProtectedRoute from "./pages/Route/ProtectedRoute";
+import Circular from "./components/Spinner/Circular";
+import React, { lazy, Suspense } from 'react';
+import AddAccessForm from "./pages/AddAccesForm";
+const ClientMain = lazy(() => import('./pages/ClientMain'));
+import { useDispatch} from 'react-redux';
+import { setUser } from "./store/slice/authSlice";
+import { useEffect } from "react";
 
 
 function App() {
+
+  const dispatch=useDispatch();
+  useEffect(() => {
+  const storedUser = localStorage.getItem('user');
+  if (storedUser) dispatch(setUser(JSON.parse(storedUser)));
+}, [dispatch]);
+
   return (
     <Router>
       <Routes>
@@ -13,26 +28,24 @@ function App() {
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/dashboard/:section" element={<Dashboard />} />
         <Route path="/face-match" element={<FaceMatch />} />
+
+        {/* Lazy loaded + protected route */}
+        <Route element={<ProtectedRoute />}>
+          <Route
+            path="/user"
+            element={
+              <Suspense fallback={<Circular/>}>
+                <ClientMain />
+              </Suspense>
+            }
+          />
+          <Route path="/access" element={<Suspense fallback={<Circular/>}>
+                <AddAccessForm />
+              </Suspense>}/>
+        </Route>
       </Routes>
     </Router>
   );
 
-// import Countdown2 from "./components/CountDown";
-// import {BrowserRouter , Routes , Route} from 'react-router-dom';
-// import FotografiyaLogin from './pages/Login';
-
-// function App() {
-  
-//    return( <>   
-
-//     <BrowserRouter>
-//     <Routes>
-//       <Route path="/" element={<FotografiyaLogin />}/>
-//       <Route path="/countodown" element={<Countdown2 />}/>
-//     </Routes>
-//     </BrowserRouter>
-
-//     </>
 }
-
 export default App;
