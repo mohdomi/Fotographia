@@ -11,11 +11,11 @@ const categorySchema = new mongoose.Schema({
         type: String,
         required: true
     },
-    order: {
-        type : Number ,
-        required : true
-    }, // keeping this temporarily for now.
-    unlockThreshhold: { type: Number ,required : true },
+    // order: {
+    //     type : Number ,
+    //     required : true
+    // }, // keeping this temporarily for now.
+    unlockThreshhold: { type: Number , required : true, default: 50 },
 
     images: [{
         type: mongoose.Schema.Types.ObjectId,

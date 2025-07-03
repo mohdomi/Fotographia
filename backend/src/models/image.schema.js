@@ -10,29 +10,29 @@ const imageSchema = new mongoose.Schema({
     categoryId : {
         type : mongoose.Schema.Types.ObjectId,
         ref : 'Category',
-        // required : true // temporarily commenting this out because of frontend schema 
+        required : true
     },
     weddingId : {
         type : mongoose.Schema.Types.ObjectId,
-        ref : 'Wedding',
-        required : false
+        ref : 'Project',
+        required : true
     },
     folderPath : {
         type : String,
-        required : false
+
     },
     originalName : {
         type : String,
-        required : false
+
     },
     // this is the key created from the uuid + date url.
     key : {
         type : String,
-        required : false
+
     },
     size : {
         type : Number,
-        required : false
+
     },
     uploadedAt : {
         type : Date,
@@ -41,7 +41,7 @@ const imageSchema = new mongoose.Schema({
 
 })
 
-
-const Image = mongoose.model('Image' , imageSchema);
+// Prevent model overwrite upon HMR or repeated imports in dev
+const Image = mongoose.models.Image || mongoose.model('Image', imageSchema);
 
 export default Image;
