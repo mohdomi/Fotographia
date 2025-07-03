@@ -9,9 +9,9 @@ const projectSchema = new mongoose.Schema({
         trim: true
     },
     Package: {
-        type : String,
-        enum : ['Free' , 'Silver' , 'Gold' , 'Platinum'],
-        default : 'Free'
+        type: String,
+        enum: ['Free', 'Silver', 'Gold', 'Platinum'],
+        default: 'Free'
     },
     Date: {
         type: Date,
@@ -42,33 +42,39 @@ const projectSchema = new mongoose.Schema({
         type: String,
         trim: true
     },
-    AdminUserId:[{
-          type : mongoose.Schema.Types.ObjectId,
-            ref : "User"
+    AdminUserId: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User"
     }]
     ,
 
-    ClientUserId:[{
-    type : mongoose.Schema.Types.ObjectId,
-    ref : "ClientUser"
+    ClientUserId: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "ClientUser"
     }],
 
-   wedding_face: {
-  type: Map,
-  of: [String],
-  default: {}
-},
+    wedding_face: {
+        type: Map,
+        of: [String],
+        default: {}
+    },
 
- wedding_img: {
-  type: Map,
-  of: [String],
-  default: {}
-}
- });
+    wedding_img: {
+        type: Map,
+        of: [String],
+        default: {}
+    },
+
+    categories: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Category'
+    }]
+
+});
 
 
 
 
-const Projects = mongoose.model("Project",projectSchema);
+const Project = mongoose.model("Project", projectSchema);
 
-export default Projects;
+export default Project;

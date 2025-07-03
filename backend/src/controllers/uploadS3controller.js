@@ -1,27 +1,32 @@
 import 'dotenv/config';
+import mongoose from 'mongoose';
 import { HeadObjectCommand } from '@aws-sdk/client-s3';
 import s3Client from '../utils/awsS3.js';
 import { createPresignedPost } from '@aws-sdk/s3-presigned-post';
 import path from 'path';
 import { v4 as uuidv4 } from 'uuid';
 import Image from '../models/image.schema.js'; // Import the Image model
+import Project from '../models/project.schema.js';
+import Category from '../models/category.schema.js';
+import { createCategoriesFromFolders,createCategoriesFromPaths,createCategoriesFromFolderNames,getLeafFolders } from '../utils/categoryCreation.js'
 
 
 // this function generates the folder structure in the server or storage bucket as same as that of the user side so nested folders could be structured correctly.
-const generateFolderPath = (categoryId, subfolder = '', baseUploadId = null) => {
+const generateFolderPath = (weddingName, subfolder = '', baseUploadId = null) => {
   if (subfolder) {
     // For nested folders, preserve the exact structure without adding unique identifiers to each subfolder
-    return `uploads/${categoryId}/${baseUploadId}/${subfolder}`;
+    return `uploads/${weddingName}/${baseUploadId}/${subfolder}`;
   }
   // Only generate unique identifier at the base level
   const timestamp = Date.now();
   const uniqueId = uuidv4().substring(0, 8);
-  return `uploads/${categoryId}/${timestamp}_${uniqueId}`;
+  return `uploads/${weddingName}/${timestamp}_${uniqueId}`;
 };
 
 // File validation function (enhanced from first approach)
 // this is actually added because of the ai team so we could add images with the correct mime type
 const validateFile = (fileInfo) => {
+  // we can add more mime types here
   const allowedMimes = [
     'image/jpeg',
     'image/jpg', 
@@ -38,7 +43,7 @@ const validateFile = (fileInfo) => {
     throw new Error(`Invalid file type: ${fileInfo.type}. Only images (JPEG, JPG, PNG) are allowed.`);
   }
 
-  // Validate file size (100MB limit)
+  // Validate file size (100MB limit) can be increased
   if (fileInfo.size && fileInfo.size > 100 * 1024 * 1024) {
     throw new Error(`File too large: ${fileInfo.name}. Maximum 100MB per file.`);
   }
@@ -76,13 +81,15 @@ const generatePresignedUrls = async (req, res) => {
     // Get upload configuration from request body (similar to first approach)
     const {
       files, // Array of file objects: [{ name, size, type, relativePath }]
-      categoryId = 'default',
+      weddingName,
+      mobile_no,
+      packages,
       preserveFolderStructure = true,
       expiresIn = 3600, // 1 hour default expiry
       uploadProvider = 's3' // Keep consistency with first approach
     } = req.body;
 
-    // Comprehensive validation (from first approach style)
+    // Comprehensive validation
     if (!files || !Array.isArray(files) || files.length === 0) {
       return res.status(400).json({
         success: false,
@@ -98,21 +105,62 @@ const generatePresignedUrls = async (req, res) => {
       });
     }
 
-    // Validate and sanitize categoryId (from first approach)
-    const sanitizedCategoryId = categoryId.replace(/[^a-zA-Z0-9_-]/g, '');
-    if (!sanitizedCategoryId) {
-      return res.status(400).json({
-        success: false,
-        error: 'Invalid category ID'
-      });
-    }
+    // we need to change this with some effiicient naming for future.
+    const root_folder_name = weddingName.trim() + "_" + mobile_no;
 
     console.log(`Starting pre-signed URL generation for ${files.length} files to ${uploadProvider}`);
 
     // Generate single base upload ID for this entire upload session (from first approach)
+    // THIS WILL BE CHANGED WHEN I WILL DO THE CATEGORY REMVOAL FROM FOLDER STRUCTURE
     const timestamp = Date.now();
     const uniqueId = uuidv4().substring(0, 8);
-    const baseUploadId = `${timestamp}_${uniqueId}`;
+    const baseUploadId = `${timestamp}_${uniqueId}`; 
+
+    // creating a project for the entire create prject route from the frontend according to the schema.
+    // create a wedding object and a category according to the last path address before the file.
+
+      let project;
+      try { 
+        
+        project = await Project.findOneAndUpdate({
+          wedding_name : weddingName,
+          Mobile_Number : mobile_no,
+          Package : packages
+        } , {
+          $setOnInsert : {wedding_name: weddingName , Mobile_Number : mobile_no}
+        } , {
+          upsert : true , new : true
+        })
+        console.log(project);
+      }catch(error){
+        console.error('Project creation error:', error);
+        return res.status(500).json({ success: false, error: 'Failed to create/find project' });
+      }
+
+      // extracting leaf folder names fro file path.
+      const filePaths = files.map(f => f.relativePath);                             // weddingId = project._id
+      const createdCategories = await createCategoriesFromPaths(filePaths , Category , project._id);
+
+      // Insert all created category ObjectIds into the Project's categories array (required by project schema)
+      if (createdCategories && createdCategories.length > 0) {
+        const categoryIds = createdCategories.map(cat => cat._id);
+        try {
+          await Project.findByIdAndUpdate(
+            project._id,
+            { $addToSet: { categories: { $each: categoryIds } } },
+            { new: true }
+          );
+        } catch (err) {
+          console.error('Failed to update Project with categoryIds:', err);
+        }
+      }
+
+      // for quick lookup we creating a map for categories and their id (this will be helpful during image push in category.);
+      const categoryMap = {};
+      createdCategories.forEach(cat => {
+        categoryMap[cat.title] = cat._id;
+      })
+
 
     // Process files with enhanced folder structure preservation
     const urlPromises = files.map(async (fileInfo, index) => {
@@ -120,9 +168,9 @@ const generatePresignedUrls = async (req, res) => {
         // Validate file
         const sanitizedFileName = validateFile(fileInfo);
 
-        // Extract folder path from relativePath if available (enhanced from both approaches)
+        // Extract folder path from relativePath if available 
         let originalPath = '';
-        let folderPath = generateFolderPath(sanitizedCategoryId);
+        let folderPath = generateFolderPath(root_folder_name);
         
         if (preserveFolderStructure && fileInfo.relativePath) {
           // Handle folder structure from drag & drop
@@ -131,17 +179,32 @@ const generatePresignedUrls = async (req, res) => {
           
           if (originalPath && originalPath !== '.') {
             // Use the same baseUploadId for all files to maintain folder structure
-            folderPath = generateFolderPath(sanitizedCategoryId, originalPath, baseUploadId);
+            folderPath = generateFolderPath(root_folder_name, originalPath, baseUploadId);
           } else {
             // For files in root, use the base folder with baseUploadId
-            folderPath = `uploads/${sanitizedCategoryId}/${baseUploadId}`;
+            folderPath = `uploads/${root_folder_name}/${baseUploadId}`;
           }
         } else {
           // For non-folder uploads, use the base folder with baseUploadId
-          folderPath = `uploads/${sanitizedCategoryId}/${baseUploadId}`;
+          folderPath = `uploads/${root_folder_name}/${baseUploadId}`;
         }
 
-        // Generate unique filename to prevent conflicts (enhanced)
+
+        /* so i am creating the category usign the folder structure somewhere here
+          using the end node name from the original file path.
+        */
+          let leafFolder = '';
+          if(originalPath){
+            const parts = originalPath.split('/');
+            leafFolder = parts[parts.length - 1];
+          }else {
+            leafFolder = 'root'; // you can put the name of the main folder.
+          }
+
+          const categoryObjectId = categoryMap[leafFolder];
+
+
+        // Generate unique filename to prevent conflicts 
         const fileExtension = path.extname(sanitizedFileName);
         const baseName = path.basename(sanitizedFileName, fileExtension);
         const uniqueFileName = `${baseName}_${Date.now()}_${index}${fileExtension}`;
@@ -158,7 +221,7 @@ const generatePresignedUrls = async (req, res) => {
             'x-amz-meta-original-path': originalPath || '',
             'x-amz-meta-upload-session': baseUploadId,
             'x-amz-meta-uploaded-at': new Date().toISOString(),
-            'x-amz-meta-category-id': sanitizedCategoryId,
+            'x-amz-meta-category-id': categoryObjectId ? categoryObjectId.toString() : 'categoryId',
             'x-amz-meta-file-index': index.toString(),
           },
           Conditions: [
@@ -174,6 +237,7 @@ const generatePresignedUrls = async (req, res) => {
 
         return {
           success: true,
+          
           originalName: fileInfo.name,
           sanitizedName: sanitizedFileName,
           key: key,
@@ -185,6 +249,10 @@ const generatePresignedUrls = async (req, res) => {
           uploadSessionId: baseUploadId,
           size: fileInfo.size,
           type: fileInfo.type,
+
+          // main yeh 2 hai
+          categoryId: categoryObjectId ? categoryObjectId.toString() : undefined,
+          weddingId: project._id,
         };
       } catch (error) {
         console.error(`Error generating URL for file ${fileInfo.name}:`, error);
@@ -199,14 +267,14 @@ const generatePresignedUrls = async (req, res) => {
     // Wait for all URL generations to complete
     const results = await Promise.all(urlPromises);
 
-    // Separate successful and failed generations (from first approach style)
+    // Separate successful and failed generations
     const successful = results.filter(r => r.success);
     const failed = results.filter(r => !r.success);
 
-    // Enhanced logging (from first approach)
+    // Enhanced logging
     console.log(`Pre-signed URL generation completed: ${successful.length} successful, ${failed.length} failed`);
 
-    // Return comprehensive response (enhanced from first approach)
+    // Return comprehensive response
     res.json({
       success: true,
       message: `Pre-signed URLs generated: ${successful.length}/${results.length} files ready for upload`,
@@ -223,7 +291,6 @@ const generatePresignedUrls = async (req, res) => {
         failed: failed.length > 0 ? failed : undefined,
       },
       uploadProvider: uploadProvider,
-      categoryId: sanitizedCategoryId,
       preserveFolderStructure: preserveFolderStructure,
     });
 
@@ -260,8 +327,7 @@ const handleUploadComplete = async (req, res) => {
   try {
     const {
       uploadSessionId,
-      files, // Array of completed file info: [{ key, originalName, finalUrl, status, size, etag, folderPath, weddingId }]
-      categoryId,
+      files, // Array of completed file info: [{ key, originalName, finalUrl, status, size, etag, folderPath, weddingId , categoryId }]
       metadata = {}
     } = req.body;
 
@@ -315,45 +381,76 @@ const handleUploadComplete = async (req, res) => {
     const successfulFiles = verifiedFiles.filter(f => f.verified);
     const failedFiles = verifiedFiles.filter(f => !f.verified);
 
-
-    // NOTE : I have to implement this section so that we store the image urls for the client to our database.
-
-
-    // Here you would typically store in database (placeholder for actual implementation)
-    /*
-    const uploadSession = {
-      sessionId: uploadSessionId,
-      categoryId: categoryId,
-      status: failedFiles.length === 0 ? 'completed' : 'partial',
-      totalFiles: files.length,
-      successfulFiles: successfulFiles.length,
-      failedFiles: failedFiles.length,
-      completedAt: new Date(),
-      metadata: metadata,
-    };
-    
-    // Store session and file metadata
-    await storeUploadSession(uploadSession);
-    await storeFileMetadata(successfulFiles);
-    */
-
     // Store image details and URLs in MongoDB for successful files
+    let insertedImages = [];
     if (successfulFiles.length > 0) {
-      const imageDocs = successfulFiles.map(file => ({
-        url: file.finalUrl,
-        categoryId: categoryId,
-        weddingId: file.weddingId || undefined,
-        folderPath: file.folderPath || undefined,
-        originalName: file.originalName || undefined,
-        key: file.key || undefined,
-        size: file.actualSize || file.size || undefined,
-        uploadedAt: file.lastModified ? new Date(file.lastModified) : new Date(),
+
+      // Ensure ObjectId types for categoryId and weddingId (ESM compatible)
+      const imageDocs = successfulFiles.map((file, idx) => {
+        let categoryId = file.categoryId;
+        let weddingId = file.weddingId;
+        // Convert to ObjectId if string, or throw if invalid
+        if (categoryId && !(categoryId instanceof mongoose.Types.ObjectId)) {
+          if (typeof categoryId === 'string' && categoryId.match(/^[a-fA-F0-9]{24}$/)) {
+            categoryId = new mongoose.Types.ObjectId(categoryId);
+          } else {
+            console.error('Invalid categoryId for image', idx, categoryId, typeof categoryId);
+            throw new Error('Invalid categoryId for image: ' + JSON.stringify(file));
+          }
+        }
+        if (weddingId && !(weddingId instanceof mongoose.Types.ObjectId)) {
+          if (typeof weddingId === 'string' && weddingId.match(/^[a-fA-F0-9]{24}$/)) {
+            weddingId = new mongoose.Types.ObjectId(weddingId);
+          } else {
+            console.error('Invalid weddingId for image', idx, weddingId, typeof weddingId);
+            throw new Error('Invalid weddingId for image: ' + JSON.stringify(file));
+          }
+        }
+        return {
+          url: file.finalUrl,
+          key: file.key,
+          categoryId: categoryId,
+          weddingId: weddingId,
+          folderPath: file.folderPath,
+          originalName: file.originalName,
+          size: file.actualSize || file.size,
+          uploadedAt: file.lastModified ? new Date(file.lastModified) : new Date(),
+        };
+      });
+      // Log for debugging
+      imageDocs.forEach((img, idx) => {
+        if (!(img.categoryId instanceof mongoose.Types.ObjectId)) {
+          console.error('categoryId is not ObjectId at', idx, img.categoryId, typeof img.categoryId);
+        }
+        if (!(img.weddingId instanceof mongoose.Types.ObjectId)) {
+          console.error('weddingId is not ObjectId at', idx, img.weddingId, typeof img.weddingId);
+        }
+      });
+      // Insert images and get the inserted docs (with _id)
+      insertedImages = await Image.insertMany(imageDocs);
+
+      // Efficiently push each image's ObjectId into the images array of its corresponding Category
+      // Use $addToSet to avoid duplicates
+      const categoryUpdates = {};
+      insertedImages.forEach(img => {
+        if (!img.categoryId) return;
+        const catId = img.categoryId.toString();
+        if (!categoryUpdates[catId]) categoryUpdates[catId] = [];
+        categoryUpdates[catId].push(img._id);
+      });
+
+      // Perform bulk update for all categories
+      const bulkOps = Object.entries(categoryUpdates).map(([catId, imageIds]) => ({
+        updateOne: {
+          filter: { _id: catId },
+          update: { $addToSet: { images: { $each: imageIds } } }
+        }
       }));
-      console.log(imageDocs)
-      await Image.insertMany(imageDocs);
+      if (bulkOps.length > 0) {
+        await Category.bulkWrite(bulkOps);
+      }
     }
 
-    // Enhanced response (from first approach style)
     res.json({
       success: true,
       message: `Upload session ${uploadSessionId} processed: ${successfulFiles.length}/${files.length} files verified successfully`,
@@ -380,8 +477,6 @@ const handleUploadComplete = async (req, res) => {
     });
   }
 };
-
-
 
 // Enhanced upload status checker with detailed information
 const getUploadStatus = async (req, res) => {
@@ -452,7 +547,6 @@ const getUploadStatus = async (req, res) => {
 
 
 // we aren't using this now as cloudinary is not implemented it keeping this for future need.
-// Helper function for setting upload provider (from first approach)
 const setUploadProvider = (req, res) => {
   const { provider } = req.body;
   
@@ -470,7 +564,6 @@ const setUploadProvider = (req, res) => {
     timestamp: new Date().toISOString(),
   });
 };
-
 
 // Enhanced file deletion function
 const deleteUploadedFiles = async (req, res) => {
@@ -525,245 +618,3 @@ export {
   deleteUploadedFiles
 };
 
-
-
-/* -------------------------------- older approach ------------------------------------- */
-
-// method to uplaod to cloudinary for now.
-
-// const uploadToCloudinary = async (file, folderPath, originalPath) => {
-//   return new Promise((resolve, reject) => {
-//     const stream = cloudinary.uploader.upload_stream(
-//       {
-//         folder: folderPath,
-//         resource_type: 'image',
-//         public_id: `${path.parse(file.originalname).name}_${Date.now()}`,
-//         use_filename: true,
-//         unique_filename: false,
-//         overwrite: false,
-//         // Preserve folder structure from client
-//         tags: originalPath ? [originalPath] : [],
-//       },
-//       (error, result) => {
-//         if (error) return reject(error);
-//         resolve({
-//           url: result.secure_url,
-//           public_id: result.public_id,
-//           folder: result.folder,
-//           original_filename: file.originalname,
-//           size: file.size,
-//           format: result.format,
-//           resource_type: result.resource_type,
-//         });
-//       }
-//     );
-    
-//     Readable.from(file.buffer).pipe(stream);
-//   });
-// };
-
-
-// // method to upload to amazon s3 for future productuon
-// export const uploadToS3 = async (file, folderPath, originalPath) => {
-//   const key = `${folderPath}/${file.originalname}`;
-  
-//   const params = {
-//     Bucket: process.env.AWS_S3_BUCKET_NAME,
-//     Key: key,
-//     Body: file.buffer,
-//     ContentType: file.mimetype,
-//     Metadata: {
-//       originalPath: originalPath || '',
-//       uploadedAt: new Date().toISOString(),
-//     }
-//   };
-
-//   try {
-//     const command = new PutObjectCommand(params);
-//     const result = await s3Client.send(command);
-    
-//     // Construct the URL manually since SDK v3 doesn't return Location
-//     const url = `https://${process.env.AWS_S3_BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com/${key}`;
-    
-//     return {
-//       url: url,
-//       key: key,
-//       bucket: process.env.AWS_S3_BUCKET_NAME,
-//       original_filename: file.originalname,
-//       size: file.size,
-//       etag: result.ETag,
-//       versionId: result.VersionId, // Available in v3
-//     };
-//   } catch (error) {
-//     console.error('S3 Upload Error:', error);
-//     throw error;
-//   }
-// };
-
-// older approach with server side flow (Not Scalable).
-
-// const mainUploadMethod = async (req, res) => {
-//   try {
-//     // Validate request
-//     if (!req.files || req.files.length === 0) {
-//       return res.status(400).json({ 
-//         success: false,
-//         error: 'No files uploaded.' 
-//       });
-//     }
-
-//     // Get upload configuration from request body
-//     const { 
-//       categoryId = 'default',
-//       preserveFolderStructure = true,
-//       uploadProvider = 's3' // 'cloudinary' or 's3' here by default it is cloudinary
-//     } = req.body;
-
-//     // Validate categoryId (basic sanitization) this for cleaning messy lines to the category or path. for server safety
-//     const sanitizedCategoryId = categoryId.replace(/[^a-zA-Z0-9_-]/g, '');
-//     if (!sanitizedCategoryId) {
-//       return res.status(400).json({
-//         success: false,
-//         error: 'Invalid category ID'
-//       });
-//     }
-
-//     console.log(`Starting upload of ${req.files.length} files to ${uploadProvider}`);
-
-//     // Generate a single base upload ID for this entire upload session
-//     const timestamp = Date.now();
-//     const uniqueId = uuidv4().substring(0, 8);
-//     const baseUploadId = `${timestamp}_${uniqueId}`;
-
-//     // Process files with folder structure preservation
-//     const uploadPromises = req.files.map(async (file) => {
-//       try {
-//         // Extract folder path from webkitRelativePath if available
-//         let originalPath = '';
-//         let folderPath = generateFolderPath(sanitizedCategoryId);
-        
-//         if (preserveFolderStructure && file.fieldname.includes('webkitRelativePath')) {
-//           // Handle folder structure from drag & drop
-//           originalPath = file.originalname.includes('/') ? 
-//             path.dirname(file.originalname) : '';
-          
-//           if (originalPath) {
-//             // Use the same baseUploadId for all files to maintain folder structure
-//             folderPath = generateFolderPath(sanitizedCategoryId, originalPath, baseUploadId);
-//           } else {
-//             // For files in root, use the base folder with baseUploadId
-//             folderPath = `uploads/${sanitizedCategoryId}/${baseUploadId}`;
-//           }
-//         } else {
-//           // For non-folder uploads, use the base folder with baseUploadId
-//           folderPath = `uploads/${sanitizedCategoryId}/${baseUploadId}`;
-//         }
-
-//         // Upload based on provider
-//         let result;
-//         if (uploadProvider === 's3') {
-//           result = await uploadToS3(file, folderPath, originalPath);
-//         } else {
-//           result = await uploadToCloudinary(file, folderPath, originalPath);
-//         }
-
-//         return {
-//           success: true,
-//           ...result,
-//           originalPath: originalPath,
-//         };
-//       } catch (error) {
-//         console.error(`Error uploading file ${file.originalname}:`, error);
-//         return {
-//           success: false,
-//           filename: file.originalname,
-//           error: error.message,
-//         };
-//       }
-//     });
-
-//     // Wait for all uploads to complete (a promise function for all the files to upload returns a collective array of promise as soon as all files get uploaded ot the server.)
-//     const results = await Promise.all(uploadPromises);
-    
-//     // Separate successful and failed uploads
-//     const successful = results.filter(r => r.success);
-//     const failed = results.filter(r => !r.success);
-
-//     // Log results
-//     console.log(`Upload completed: ${successful.length} successful, ${failed.length} failed`);
-
-//     // Return comprehensive response
-//     res.json({
-//       success: true,
-//       message: `Upload completed: ${successful.length}/${results.length} files uploaded successfully`,
-//       stats: {
-//         total: results.length,
-//         successful: successful.length,
-//         failed: failed.length,
-//       },
-//       data: {
-//         successful: successful,
-//         failed: failed.length > 0 ? failed : undefined,
-//       },
-//       uploadProvider: uploadProvider,
-//       categoryId: sanitizedCategoryId,
-//     });
-
-//   } catch (error) {
-//     console.error('Upload error:', error);
-    
-//     // Handle multer errors specifically
-
-//     // this is for maximum file size limit.
-//     if (error instanceof multer.MulterError) {
-//       if (error.code === 'LIMIT_FILE_SIZE') {
-//         return res.status(400).json({
-//           success: false,
-//           error: 'File size too large. Maximum 10MB per file.'
-//         });
-//       }
-
-//       // this is for maximum file limit.
-//       if (error.code === 'LIMIT_FILE_COUNT') {
-//         return res.status(400).json({
-//           success: false,
-//           error: 'Too many files. Maximum 100 files allowed.'
-//         });
-//       }
-//     }
-
-//     res.status(500).json({
-//       success: false,
-//       error: 'Upload failed',
-//       details: process.env.NODE_ENV === 'development' ? error.message : undefined
-//     });
-//   }
-// };
-
-// making this temporary function for toggling between cloudinary and s3 buckets.
-
-
-// no need for this function as only awsS3 is being used for production so i removed this. still keeping as commented just in case for future use.
- 
-// const setUploadProvider = (req, res) => {
-//   const { provider } = req.body;
-  
-//   if (!['cloudinary', 's3'].includes(provider)) {
-//     return res.status(400).json({
-//       success: false,
-//       error: 'Invalid provider. Must be "cloudinary" or "s3"'
-//     });
-//   }
-
-//   // so we can store this provider value in some state , local storage or a cookie and then use it in future.
-//   // i would suggest to better use it with local storage or state.
-//   res.json({
-//     success: true,
-//     message: `Upload provider set to ${provider}`,
-//     provider: provider
-//   });
-// }
-
-// export {
-//   mainUploadMethod , setUploadProvider
-// }
