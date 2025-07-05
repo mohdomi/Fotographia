@@ -27,11 +27,8 @@ function App() {
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/dashboard/:section" element={<Dashboard />} />
         <Route path="/face-match" element={<FaceMatch />} />
-        <Route path="/fac-match" element={<FileUpload />} />
 
     
-
-
         {/* Lazy loaded + protected route */}
         <Route element={<ProtectedRoute />}>
           <Route
