@@ -407,7 +407,6 @@ const handleUploadComplete = async (req, res) => {
           }
         }
         return {
-          url: file.finalUrl,
           key: file.key,
           categoryId: categoryId,
           weddingId: weddingId,
