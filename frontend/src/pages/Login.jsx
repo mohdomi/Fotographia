@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import Logo from '../components/Logo';
 
 const Login = () => {
   const navigate = useNavigate();
@@ -38,11 +39,7 @@ const Login = () => {
             style={{ minHeight: '200px' }}
           >
             <div className="text-center">
-              <img 
-                src="/logo.png" 
-                alt="Fotographiya Logo" 
-                className="h-16 lg:h-20 w-auto object-contain"
-              />
+              <Logo size="lg" />
             </div>
           </div>
           <div className="absolute inset-0 bg-black bg-opacity-20"></div>
@@ -52,11 +49,7 @@ const Login = () => {
         <div className="lg:flex-1 p-6 sm:p-8 lg:p-12 flex flex-col justify-center">
           {/* Logo */}
           <div className="flex items-center mb-8 lg:mb-12">
-            <img 
-              src="/logo.png" 
-              alt="Fotographiya Logo" 
-              className="h-8 sm:h-10 w-auto object-contain"
-            />
+            <Logo size="md" />
           </div>
 
           {/* Welcome Text */}

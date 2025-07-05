@@ -1,6 +1,9 @@
+
+import React, { useState } from "react";
+
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Dashboard from "./pages/Dashboard";
-import FaceMatch from "./pages/FaceMatch";
+
 import Login from "./pages/Login";
 import ProtectedRoute from "./pages/Route/ProtectedRoute";
 import Circular from "./components/Spinner/Circular";
@@ -25,6 +28,15 @@ function App() {
         <Route path="/" element={<Login />} />
         <Route path="/login" element={<Login />} />
         <Route path="/dashboard" element={<Dashboard />} />
+oves-branch
+        <Route path="/dashboard/pending" element={<Dashboard />} />
+        <Route path="/dashboard/current" element={<Dashboard />} />
+        <Route path="/dashboard/completed" element={<Dashboard />} />
+        <Route path="/add-project" element={<AddProject />} />
+        
+        <Route path="/invite" element={<InviteDemo />} />
+        <Route path="/client" element={<ClientMain />} />
+
         <Route path="/dashboard/:section" element={<Dashboard />} />
         <Route path="/face-match" element={<FaceMatch />} />
         <Route path="/fac-match" element={<FileUpload />} />
