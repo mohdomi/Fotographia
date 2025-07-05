@@ -3,10 +3,6 @@ import mongoose from 'mongoose';
 
 const imageSchema = new mongoose.Schema({
 
-    url : {
-        type : String,
-        required : true
-    },
     categoryId : {
         type : mongoose.Schema.Types.ObjectId,
         ref : 'Category',
@@ -41,7 +37,6 @@ const imageSchema = new mongoose.Schema({
 
 })
 
-// Prevent model overwrite upon HMR or repeated imports in dev
-const Image = mongoose.models.Image || mongoose.model('Image', imageSchema);
+const Image =  mongoose.model('Image', imageSchema);
 
 export default Image;
