@@ -1,5 +1,5 @@
 import { createSlice } from '@reduxjs/toolkit';
-import { loginUser } from '../thunks/authThunk';    // adjust path accordingly
+import { Adminlogin, loginUser } from '../thunks/authThunk';    // adjust path accordingly
 
 const authSlice = createSlice({
   name: 'auth',
@@ -41,6 +41,21 @@ const authSlice = createSlice({
          localStorage.setItem('user', JSON.stringify(action.payload));
       })
       .addCase(loginUser.rejected, (state, action) => {
+        state.loading = false;
+        state.user = null;
+        state.error = action.payload;
+      })
+      .addCase(Adminlogin.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(Adminlogin.fulfilled, (state, action) => {
+        state.loading = false;
+        state.user = action.payload;
+        state.error = null;
+         localStorage.setItem('user', JSON.stringify(action.payload));
+      })
+      .addCase(Adminlogin.rejected, (state, action) => {
         state.loading = false;
         state.user = null;
         state.error = action.payload;

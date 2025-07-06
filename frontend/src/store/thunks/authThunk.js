@@ -14,3 +14,16 @@ export const loginUser = createAsyncThunk(
     }
   }
 );
+
+export const Adminlogin = createAsyncThunk(
+  'auth/Adminlogin',
+  async ({password}, thunkAPI) => {
+    try {
+      const response = await api.post('/api/v1/admin/adminsignin', {password});
+      return response.data.user;
+    } catch (err) {
+      const message = err.response?.data?.message || err.message;
+      return thunkAPI.rejectWithValue(message);
+    }
+  }
+);

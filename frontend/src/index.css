@@ -4,3 +4,25 @@
 
 
 
+@font-face {
+  font-family: 'Rage Italic';
+  src: url('/fonts/rageitalic.ttf') format('truetype');
+  font-weight: 400;
+  font-style:normal;
+}
+
+.rage-welcome {
+  font-family: 'Rage Italic', 'cursive';
+  font-size:56px;
+  font-weight:400;
+  font-style:normal;
+  color: #0f0e0e;
+  line-height: 1;
+  transform: rotate(-1.2deg); 
+  letter-spacing: 1px;
+  text-shadow: 0.5px 0.5px 0 #999;
+ 
+   display: inline-block;
+  padding-bottom: 4px;
+
+}

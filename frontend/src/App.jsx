@@ -1,19 +1,17 @@
 
-import React, { useState } from "react";
-
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Dashboard from "./pages/Dashboard";
 
 import Login from "./pages/Login";
 import ProtectedRoute from "./pages/Route/ProtectedRoute";
 import Circular from "./components/Spinner/Circular";
-import React, { lazy, Suspense } from 'react';
+import  { lazy, Suspense } from 'react';
 import AddAccessForm from "./pages/AddAccesForm";
 const ClientMain = lazy(() => import('./pages/ClientMain'));
 import { useDispatch} from 'react-redux';
 import { setUser } from "./store/slice/authSlice";
 import { useEffect } from "react";
-import FileUpload from "./pages/FileUploadDemo";
+//import FileUpload from "./pages/FileUploadDemo";
 function App() {
 
   const dispatch=useDispatch();
@@ -28,17 +26,16 @@ function App() {
         <Route path="/" element={<Login />} />
         <Route path="/login" element={<Login />} />
         <Route path="/dashboard" element={<Dashboard />} />
-oves-branch
         <Route path="/dashboard/pending" element={<Dashboard />} />
         <Route path="/dashboard/current" element={<Dashboard />} />
         <Route path="/dashboard/completed" element={<Dashboard />} />
-        <Route path="/add-project" element={<AddProject />} />
+        {/* <Route path="/add-project" element={<AddProject />} /> */}
         
-        <Route path="/invite" element={<InviteDemo />} />
+        {/* <Route path="/invite" element={<InviteDemo />} /> */}
         <Route path="/client" element={<ClientMain />} />
 
         <Route path="/dashboard/:section" element={<Dashboard />} />
-        <Route path="/face-match" element={<FaceMatch />} />
+        {/* <Route path="/face-match" element={<FaceMatch />} /> */}
 
     
         {/* Lazy loaded + protected route */}
