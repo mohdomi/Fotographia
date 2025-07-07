@@ -4,7 +4,7 @@ import Header from '../components/Header';
 const ClientMain = () => {
   // Timer state - starts at 30 minutes (1800 seconds)
   const [timeLeft, setTimeLeft] = useState(1800);
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+//  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   
   // Progress tracking
   const [selectedHaldiPhotos, setSelectedHaldiPhotos] = useState(new Set());

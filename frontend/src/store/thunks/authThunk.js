@@ -7,7 +7,8 @@ export const loginUser = createAsyncThunk(
   async ({pin}, thunkAPI) => {
     try {
       const response = await api.post('/api/v1/user/signin', {pin});
-      return response.data.user;
+       console.log(response.data);
+      return await response?.data;
     } catch (err) {
       const message = err.response?.data?.message || err.message;
       return thunkAPI.rejectWithValue(message);
@@ -19,8 +20,23 @@ export const Adminlogin = createAsyncThunk(
   'auth/Adminlogin',
   async ({password}, thunkAPI) => {
     try {
-      const response = await api.post('/api/v1/admin/adminsignin', {password});
-      return response.data.user;
+      const response = await api.post('/api/v1/admin/admsignin', {password});
+      return await response?.data?.user;
+    } catch (err) {
+      const message = err.response?.data?.message || err.message;
+      return thunkAPI.rejectWithValue(message);
+    }
+  }
+);
+
+
+export const logoutThunk = createAsyncThunk(
+  'auth/logoutThunk',
+  async (_, thunkAPI) => {
+    try {
+      const response = await api.post('/api/v1/user/logout');
+      console.log(response);
+      return response.data; // optional, can return message or empty
     } catch (err) {
       const message = err.response?.data?.message || err.message;
       return thunkAPI.rejectWithValue(message);

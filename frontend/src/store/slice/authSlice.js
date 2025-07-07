@@ -1,5 +1,5 @@
 import { createSlice } from '@reduxjs/toolkit';
-import { Adminlogin, loginUser } from '../thunks/authThunk';    // adjust path accordingly
+import { Adminlogin, loginUser,logoutThunk } from '../thunks/authThunk';    // adjust path accordingly
 
 const authSlice = createSlice({
   name: 'auth',
@@ -59,7 +59,21 @@ const authSlice = createSlice({
         state.loading = false;
         state.user = null;
         state.error = action.payload;
-      });
+      })
+      .addCase(logoutThunk.pending, (state) => {
+      state.loading = true;
+      state.error = null;
+    })
+    .addCase(logoutThunk.fulfilled, (state) => {
+      state.loading = false;
+      state.user = null;
+      state.error = null;
+      localStorage.removeItem('user');
+    })
+    .addCase(logoutThunk.rejected, (state, action) => {
+      state.loading = false;
+      state.error = action.payload;
+    });
   }
 });
 

@@ -4,21 +4,38 @@ import  { useState } from 'react';
 import { useNavigate } from 'react-router-dom'
 
 import LoginForm from '../components/LoginForm';
+import { useDispatch } from 'react-redux';
+import { Adminlogin, loginUser } from '../store/thunks/authThunk';
+import { toast } from 'react-toastify';
 
 function Login() {
-  const navigate = useNavigate();
+   const navigate = useNavigate();
     const [pin, setPin] = useState('');
     const [admin,setAdmin]=useState(false);
     const [agreedToTerms, setAgreedToTerms] = useState(false);
-
-  const handleSubmit = (e) => {
+    const dispatch =useDispatch();
+  const handleSubmit = async(e) => {
     e.preventDefault();
     if (pin && agreedToTerms) {
       if(admin){
-console.log("Admin login");
-        navigate("/dashboard");
-      }else{
-        console.log("Not admin");
+        try {
+       await dispatch(Adminlogin({password:pin})).unwrap();
+       toast.success("Welcome back Admin");
+       navigate("/dashboard");
+        } catch (error) {
+          toast.error(error || "Login failed");
+        }
+
+    } else {
+
+   try {
+    await dispatch(loginUser({ pin })).unwrap(); // only proceeds if successful
+    toast.success("Login successful");
+        navigate('/client');
+  } catch (error) {
+    // catch the rejected value here
+    toast.error(error || "Login failed");
+  }
       }
     }
   };

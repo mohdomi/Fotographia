@@ -1,5 +1,8 @@
 import React, { useState } from 'react';
 import Logo from './Logo';
+import { useDispatch } from 'react-redux';
+import { logoutUser } from '../store/slice/authSlice';
+import LogoutButton from './LogoutButton';
 
 const Header = ({ 
   showTimer = false, 
@@ -8,7 +11,7 @@ const Header = ({
   className = '' 
 }) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-
+  const dispatch=useDispatch();
   return (
     <header className={`bg-white shadow-sm ${className}`}>
       <div className="max-w-7xl mx-auto px-4 md:px-6">
@@ -60,10 +63,15 @@ const Header = ({
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
                   </svg>
                   {notificationCount > 0 && (
+                    <>
                     <span className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full text-xs text-white flex items-center justify-center">
                       {notificationCount}
                     </span>
+                    </>
                   )}
+
+                  {/*  For testing purpose  */}
+                  <LogoutButton/>
                 </div>
                 <div className="text-right">
                   <div className="text-sm font-medium text-gray-800">{userName}</div>
@@ -108,10 +116,14 @@ const Header = ({
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
                   </svg>
                   {notificationCount > 0 && (
+                    <>
                     <span className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full text-xs text-white flex items-center justify-center">
                       {notificationCount}
                     </span>
+                      <button className="bg-blue-500 w-full" onClick={async()=>await dispatch(logoutUser)}>Logout</button>
+                    </>
                   )}
+                 
                 </div>
                 <div className="text-sm font-medium text-gray-800">{userName}</div>
               </div>
@@ -121,7 +133,7 @@ const Header = ({
       </div>
       
       {/* Blue accent line */}
-      <div className="h-0.5 bg-gradient-to-r from-blue-400 to-purple-500"></div>
+      {/* <div className="h-0.5 bg-gradient-to-r from-blue-400 to-purple-500"></div> */}
     </header>
   );
 };
