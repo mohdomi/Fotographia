@@ -11,7 +11,7 @@ const Logo = ({ size = 'md', className = '' }) => {
 
   return (
     <img 
-      src="/logo.png" 
+      src="/logo/title.png" 
       alt="Fotographiya Logo" 
       className={`${sizeClasses[size] || sizeClasses.md} w-auto object-contain ${className}`}
     />

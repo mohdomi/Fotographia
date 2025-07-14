@@ -7,12 +7,12 @@ import { Provider } from 'react-redux';
 import { CookiesProvider } from 'react-cookie';
 
 createRoot(document.getElementById('root')).render(
-  <StrictMode>
+
     <Provider store={store}>
       <CookiesProvider>
   <App />
       </CookiesProvider>
   
     </Provider>
-  </StrictMode>
+
 )

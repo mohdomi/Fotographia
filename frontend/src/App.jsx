@@ -1,7 +1,7 @@
 
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Dashboard from "./pages/Dashboard";
-
+import AddProject from "./pages/AddProject";
 import Login from "./pages/Login";
 import ProtectedRoute from "./pages/Route/ProtectedRoute";
 import Circular from "./components/Spinner/Circular";
@@ -29,8 +29,11 @@ function App() {
         <Route path="/" element={<Login />} />
         <Route path="/login" element={<Login />} />
 
+        {/* writing these outside for omair */}
+        <Route path="/omair_dashboard" element={<Dashboard />}></Route>
+        <Route path="/add-project" element={<AddProject />} />
+        <Route path="/omair_client" element={<ClientMain />} />
         
-        {/* <Route path="/add-project" element={<AddProject />} /> */}
         
         <Route element={<ProtectedForAdmin />}>
         {/* <Route path="/dashboard" element={<Dashboard />} /> */}
@@ -50,9 +53,6 @@ function App() {
         {/* <Route path="/invite" element={<InviteDemo />} /> */}
         
 
-  
-        {/* <Route path="/face-match" element={<FaceMatch />} /> */}
-    
         {/* Lazy loaded + protected route */}
         <Route element={<ProtectedRoute />}>
         <Route path="/client" element={<ClientMain />} />
