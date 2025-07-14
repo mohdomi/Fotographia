@@ -46,6 +46,7 @@ const getWeddingImagesWithPresignedUrls = async (req, res) => {
                 categoryId: cat._id,
                 categoryTitle: cat.title,
                 images: imageUrls.filter(Boolean),
+                categoryThreshold: cat.unlockThreshhold
             };
         }));
 

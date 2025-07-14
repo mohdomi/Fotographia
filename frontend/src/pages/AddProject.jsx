@@ -63,7 +63,7 @@ const FileItem = ({ fileInfo }) => {
     );
 };
 
-const FaceMatch = () => {
+const AddProject = () => {
 
   // --- State Management ---
   const [filesInfo, setFilesInfo] = useState([]);
@@ -551,4 +551,4 @@ const FaceMatch = () => {
   );
 };
 
-export default FaceMatch;
+export default AddProject;

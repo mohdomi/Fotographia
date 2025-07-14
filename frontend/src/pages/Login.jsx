@@ -1,6 +1,6 @@
 
 import React from 'react'
-import  { useState } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom'
 
 import LoginForm from '../components/LoginForm';
@@ -9,37 +9,37 @@ import { Adminlogin, loginUser } from '../store/thunks/authThunk';
 import { toast } from 'react-toastify';
 
 function Login() {
-   const navigate = useNavigate();
-    const [pin, setPin] = useState('');
-    const [admin,setAdmin]=useState(false);
-    const [agreedToTerms, setAgreedToTerms] = useState(false);
-    const dispatch =useDispatch();
-  const handleSubmit = async(e) => {
+  const navigate = useNavigate();
+  const [pin, setPin] = useState('');
+  const [admin, setAdmin] = useState(false);
+  const [agreedToTerms, setAgreedToTerms] = useState(false);
+  const dispatch = useDispatch();
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (pin && agreedToTerms) {
-      if(admin){
+      if (admin) {
         try {
-       await dispatch(Adminlogin({password:pin})).unwrap();
-       toast.success("Welcome back Admin");
-       navigate("/dashboard");
+          await dispatch(Adminlogin({ password: pin })).unwrap();
+          toast.success("Welcome back Admin");
+          navigate("/dashboard");
         } catch (error) {
           toast.error(error || "Login failed");
         }
 
-    } else {
+      } else {
 
-   try {
-    await dispatch(loginUser({ pin })).unwrap(); // only proceeds if successful
-    toast.success("Login successful");
-        navigate('/client');
-  } catch (error) {
-    // catch the rejected value here
-    toast.error(error || "Login failed");
-  }
+        try {
+          await dispatch(loginUser({ pin })).unwrap(); // only proceeds if successful
+          toast.success("Login successful");
+          navigate('/client');
+        } catch (error) {
+          // catch the rejected value here
+          toast.error(error || "Login failed");
+        }
       }
     }
   };
- 
+
   return (
     <div className="maindiv h-screen w-screen grid grid-rows-[40px_1fr]  py-4 px-4 sm:p-8">
       {/* Header */}
@@ -77,21 +77,21 @@ function Login() {
 
         {/* Right Column - Form */}
 
-        <div className="w-full p-4 self-start">
+        <div className="w-full p-4 self-start h-full flex flex-col justify-center">
           <div className="mb-6 lg:mb-8">
             <p className="font-bold text-black text-center text-sm sm:text-base">
-              
-               {admin ? "Log in as Admin" : "Log in to continue"} 
+
+              {admin ? "Log in as Admin" : "Log in to continue"}
             </p>
           </div>
-        <LoginForm pin={pin}
-        setPin={setPin}
-        agreedToTerms={agreedToTerms}
-        setAgreedToTerms={setAgreedToTerms}
-        handleSubmit={handleSubmit} 
-        setAdmin={setAdmin}
-        admin={admin} />
-        
+          <LoginForm pin={pin}
+            setPin={setPin}
+            agreedToTerms={agreedToTerms}
+            setAgreedToTerms={setAgreedToTerms}
+            handleSubmit={handleSubmit}
+            setAdmin={setAdmin}
+            admin={admin} />
+
         </div>
       </div>
     </div>
