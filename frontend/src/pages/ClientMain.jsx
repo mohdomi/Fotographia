@@ -1,5 +1,5 @@
 import Header from "../components/Header"
-import { useEffect, useState } from "react"
+import { useEffect, useState , useMemo } from "react"
 import axios from "axios"
 
 const ClientMain = () => {
@@ -72,43 +72,48 @@ const ClientMain = () => {
         FetchImages();
     }, [])
 
+    // Memoize the callback per index so its reference is stable for each PhotoGridUnlocked
+    const handleClickedLengthChangeMap = useMemo(() => {
+        return categoryDetails.data.map((_, idx) =>
+            (clickedLength) => {
+                setClickedImagesTracker(prev => {
+                    const updated = [...prev];
+                    updated[idx] = clickedLength;
+                    return updated;
+                });
+            }
+        );
+    }, [categoryDetails.data.length]);
+
     return (
         <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-orange-50">
-
             <Header
                 showTimer={true}
                 userName="DESHANT MEMARA"
                 notificationCount={2}
             />
-
             <main className="max-w-[1400px] mx-auto py-4 md:py-8 px-4 md:px-8">
-                {categoryDetails.data.map((category, idx) => {
-                    return <PhotoGridUnlocked
+                {categoryDetails.data.map((category, idx) => (
+                    <PhotoGridUnlocked
                         key={idx}
                         category={category}
                         gridUnlock={unlockedIndexes.includes(idx)}
-                        changeInClickedLength={(clickedLength) => setClickedImagesTracker(prev => {
-                            const updated = [...prev];
-                            updated[idx] = clickedLength;
-                            return updated;
-                        })}
+                        changeInClickedLength={handleClickedLengthChangeMap[idx]}
                     />
-                })}
+                ))}
             </main>
         </div>
-    )
+    );
 }
 
-const PhotoGridUnlocked = ({ category, gridUnlock, changeInClickedLength, unlockThresholdUpdate }) => {
+const PhotoGridUnlocked = ({ category, gridUnlock, changeInClickedLength }) => {
 
     const totalImages = category.images.length;
     const [clickedLength, setClickedLength] = useState(0);
 
     useEffect(() => {
-
         changeInClickedLength(clickedLength);
-
-    }, [clickedLength, changeInClickedLength, unlockThresholdUpdate]);
+    }, [clickedLength]);
 
 
     return (
