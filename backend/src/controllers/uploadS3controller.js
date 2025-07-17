@@ -236,8 +236,7 @@ const generatePresignedUrls = async (req, res) => {
         const finalUrl = `https://${process.env.AWS_S3_BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com/${key}`;
 
         return {
-          success: true,
-          
+          success: true,    
           originalName: fileInfo.name,
           sanitizedName: sanitizedFileName,
           key: key,
@@ -253,6 +252,7 @@ const generatePresignedUrls = async (req, res) => {
           // main yeh 2 hai
           categoryId: categoryObjectId ? categoryObjectId.toString() : undefined,
           weddingId: project._id,
+
         };
       } catch (error) {
         console.error(`Error generating URL for file ${fileInfo.name}:`, error);
