@@ -42,7 +42,7 @@ function App() {
             path="/dashboard"
             element={
               <Suspense fallback={<Circular/>}>
-                <ClientMain />
+                <Dashboard/>
               </Suspense>
             }
           />
