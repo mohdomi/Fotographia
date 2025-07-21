@@ -10,11 +10,18 @@ const Logo = ({ size = 'md', className = '' }) => {
   };
 
   return (
+    <div className='flex'>
+    <img
+    src='logo/logo.png'
+     className={`${sizeClasses[size] || sizeClasses.md} w-auto object-contain ${className}`}
+     alt='Fotographiya Logo'
+    />
     <img 
       src="/logo/title.png" 
-      alt="Fotographiya Logo" 
+      alt="Fotographiya title" 
       className={`${sizeClasses[size] || sizeClasses.md} w-auto object-contain ${className}`}
     />
+    </div>
   );
 };
 

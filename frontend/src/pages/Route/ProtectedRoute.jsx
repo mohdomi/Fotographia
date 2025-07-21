@@ -1,28 +1,26 @@
 import { useEffect, useState } from 'react';
-import { Navigate, Outlet } from 'react-router-dom';
-import api from '../../api/axios'; // your axios instance
-
+import {Outlet } from 'react-router-dom';
+import { useLocation,useNavigate } from 'react-router-dom';
 const ProtectedRoute = () => {
-  const [authChecked, setAuthChecked] = useState(false);
   const [authenticated, setAuthenticated] = useState(false);
-
+const location = useLocation();
+  const navigate = useNavigate();
+  const data = JSON.parse(localStorage.getItem("user"));
+ 
   useEffect(() => {
-    const checkSession = async () => {
-      try {
-        await api.get('/api/v1/user/me', { withCredentials: true });
+     if (data?.role === "MainAdmin" || data?.user?.role === "AdminUser") {
         setAuthenticated(true);
-      }catch{
+      } else {
         setAuthenticated(false);
-      } finally {
-        setAuthChecked(true);
+         const from = location.state?.from || "/";
+      navigate(from, { replace: true });
       }
-    };
-    checkSession();
-  }, []);
+    }
+  , [data,navigate,location]);
 
-  if (!authChecked) return <div>Loading...</div>;
-  if (!authenticated) return <Navigate to="/login" replace />;
-  return <Outlet />;
+  return authenticated? <Outlet/>:null;
+  // if (authenticated) return <Navigate to="/" replace={true} />;
+  // return <Outlet />;
 };
 
 export default ProtectedRoute;

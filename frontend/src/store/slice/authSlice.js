@@ -1,5 +1,5 @@
 import { createSlice } from '@reduxjs/toolkit';
-import { Adminlogin, loginUser,logoutThunk } from '../thunks/authThunk';    // adjust path accordingly
+import { Adminlogin, AdminlogoutThunk, loginUser,logoutThunk } from '../thunks/authThunk';    // adjust path accordingly
 
 const authSlice = createSlice({
   name: 'auth',
@@ -22,6 +22,12 @@ const authSlice = createSlice({
       state.loading = false;
     },
     logoutUser: (state) => {
+      state.user = null;
+      state.loading = false;
+      state.error = null;
+      localStorage.removeItem('user');
+    },
+    Adminlogout:(state)=>{
       state.user = null;
       state.loading = false;
       state.error = null;
@@ -73,9 +79,24 @@ const authSlice = createSlice({
     .addCase(logoutThunk.rejected, (state, action) => {
       state.loading = false;
       state.error = action.payload;
-    });
+    })
+     .addCase(AdminlogoutThunk.pending, (state) => {
+      state.loading = true;
+      state.error = null;
+    })
+    .addCase(AdminlogoutThunk.fulfilled, (state) => {
+      state.loading = false;
+      state.user = null;
+      state.error = null;
+      localStorage.removeItem('user');
+    })
+    .addCase(AdminlogoutThunk.rejected, (state, action) => {
+      state.loading = false;
+      state.error = action.payload;
+    })
+    ;
   }
 });
 
-export const { setUser, setLoading, setAuthError, logoutUser } = authSlice.actions;
+export const { setUser, setLoading, setAuthError, logoutUser,Adminlogout} = authSlice.actions;
 export default authSlice.reducer;

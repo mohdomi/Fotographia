@@ -68,10 +68,10 @@ const Dashboard = () => {
     }
   }, [location.pathname]);
 
-  const handleNav = (sec) => {
-    setCurrentSection(sec);
-    navigate(sec === 'dashboard' ? '/dashboard' : `/dashboard/${sec}`);
-  };
+  // const handleNav = (sec) => {
+  //   setCurrentSection(sec);
+  //   navigate(sec === 'dashboard' ? '/dashboard' : `/dashboard/${sec}`);
+  // };
 
   const handleDelete = (type, index) => {
     switch (type) {
@@ -192,7 +192,7 @@ const Dashboard = () => {
             <button 
               className="bg-[#181818] text-white border-none rounded-lg py-[10px] px-4 lg:px-[18px] text-sm lg:text-base font-medium cursor-pointer hover:bg-[#444] flex-1 sm:flex-none"
               type="button" 
-              onClick={() => navigate('/add-project')}
+              onClick={() => navigate('/new-project')}
             >
               <span className="sm:hidden">+</span>
               <span className="hidden sm:inline">+ Add project</span>

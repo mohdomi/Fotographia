@@ -29,9 +29,21 @@ export const Adminlogin = createAsyncThunk(
   }
 );
 
-
+export const AdminlogoutThunk = createAsyncThunk(
+  'auth/AdminlogoutThunk',
+  async (_, thunkAPI) => {
+    try {
+      const response = await api.post('/api/v1/admin/logout');
+      console.log(response);
+      return response.data; // optional, can return message or empty
+    } catch (err) {
+      const message = err.response?.data?.message || err.message;
+      return thunkAPI.rejectWithValue(message);
+    }
+  }
+);
 export const logoutThunk = createAsyncThunk(
-  'auth/logoutThunk',
+  'auth/UserlogoutThunk',
   async (_, thunkAPI) => {
     try {
       const response = await api.post('/api/v1/user/logout');

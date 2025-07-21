@@ -6,13 +6,12 @@ import { toast } from 'react-toastify';
 function LogoutButton() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-
   const handleLogout = async() => {
     try {
         const res= await dispatch(logoutThunk()).unwrap();
         console.log(res);
            toast.success(`${res?.message}`);
-        navigate('/login');
+         navigate("/", { state: { from: location.pathname } });
     } catch (error) {
         toast.error(`${error?.message}` || "Logout not performed!");
     }

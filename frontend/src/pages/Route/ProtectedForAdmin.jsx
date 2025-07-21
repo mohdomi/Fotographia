@@ -1,28 +1,28 @@
 import React, { useEffect } from 'react';
-import { useSelector } from 'react-redux';
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
-
+import { useState } from 'react';
 function ProtectedForAdmin() {
-  const user = useSelector((state) => state.auth.user); // assumed state.auth.user
-  const role = user?.role;
   const location = useLocation();
   const navigate = useNavigate();
-console.log(location);
+  const [authenticated,setAuthenticated] =useState(true);
+  const data = JSON.parse(localStorage.getItem("user"));
+  
   useEffect(() => {
-    if (user && role !== "MainAdmin") {
+    if ( data?.role !== "MainAdmin") {
       toast.warning("You are not admin");
-
+      setAuthenticated(false);
       // Go back to previous page or home
-      navigate(location.state?.from || '/', { replace: true });
+
+      const from = location.state?.from || "/";
+      navigate(from, { replace: true });
+      
     }
-  }, [user, role, location, navigate]);
+  }, [navigate,data,location]);
 
-  // Wait for user to be loaded (optional loading state)
-  if (!user) return <h1>Loading...</h1>;
+ return authenticated ? <Outlet/> : null;
 
-  // Only show admin route if role is MainAdmin
-  return role === "MainAdmin" ? <Outlet /> : null;
+  
 }
 
 export default ProtectedForAdmin;

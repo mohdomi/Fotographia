@@ -1,7 +1,6 @@
 
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Dashboard from "./pages/Dashboard";
-import AddProject from "./pages/AddProject";
 import Login from "./pages/Login";
 import ProtectedRoute from "./pages/Route/ProtectedRoute";
 import Circular from "./components/Spinner/Circular";
@@ -9,38 +8,23 @@ import  { lazy, Suspense } from 'react';
 import AddAccessForm from "./pages/AddAccesForm";
 const ClientMain = lazy(() => import('./pages/ClientMain'));
 import ProtectedForAdmin from "./pages/Route/ProtectedForAdmin";
-import { useDispatch} from 'react-redux';
-import { setUser } from "./store/slice/authSlice";
-import { useEffect } from "react";
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import NewProject from "./pages/NewProject";
 //import FileUpload from "./pages/FileUploadDemo";
 function App() {
-  const dispatch=useDispatch();
-  useEffect(() => {
-  const storedUser = localStorage.getItem('user');
-  if (storedUser) dispatch(setUser(JSON.parse(storedUser)));
-}, [dispatch]);
-
   return (
     <>
     <Router>
       <Routes>
         <Route path="/" element={<Login />} />
-        <Route path="/login" element={<Login />} />
-
         {/* writing these outside for omair */}
-        <Route path="/omair_dashboard" element={<Dashboard />}></Route>
-        <Route path="/add-project" element={<AddProject />} />
+        {/* <Route path="/omair_dashboard" element={<Dashboard />}></Route> */}
         <Route path="/omair_client" element={<ClientMain />} />
         
-        
+   
+
         <Route element={<ProtectedForAdmin />}>
-        {/* <Route path="/dashboard" element={<Dashboard />} /> */}
-        <Route path="/dashboard/pending" element={<Dashboard />} />
-        <Route path="/dashboard/current" element={<Dashboard />} />
-        <Route path="/dashboard/completed" element={<Dashboard />} />
-        <Route path="/dashboard/:section" element={<Dashboard />} />
           <Route
             path="/dashboard"
             element={
@@ -48,13 +32,20 @@ function App() {
                 <Dashboard/>
               </Suspense>
             }
-          />
-          </Route>
+/>
+        <Route path="/new-project" element={<NewProject/>}/> 
+        <Route path="/dashboard/pending" element={<Dashboard />} />
+        <Route path="/dashboard/current" element={<Dashboard />} />
+        <Route path="/dashboard/completed" element={<Dashboard />} />
+        <Route path="/dashboard/:section" element={<Dashboard />} />
+   </Route>
         {/* <Route path="/invite" element={<InviteDemo />} /> */}
         
 
         {/* Lazy loaded + protected route */}
-        <Route element={<ProtectedRoute />}>
+        <Route element={ <Suspense fallback={<Circular/>}>
+                <ProtectedRoute/>
+              </Suspense>}>
         <Route path="/client" element={<ClientMain />} />
           <Route
             path="/user"

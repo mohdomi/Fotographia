@@ -7,6 +7,7 @@ import LoginForm from '../components/LoginForm';
 import { useDispatch } from 'react-redux';
 import { Adminlogin, loginUser } from '../store/thunks/authThunk';
 import { toast } from 'react-toastify';
+import Logo from '../components/Logo';
 
 function Login() {
   const navigate = useNavigate();
@@ -21,7 +22,7 @@ function Login() {
         try {
           await dispatch(Adminlogin({ password: pin })).unwrap();
           toast.success("Welcome back Admin");
-          navigate("/dashboard");
+         navigate("/dashboard", { state: { from: location.pathname } });
         } catch (error) {
           toast.error(error || "Login failed");
         }
@@ -31,7 +32,7 @@ function Login() {
         try {
           await dispatch(loginUser({ pin })).unwrap(); // only proceeds if successful
           toast.success("Login successful");
-          navigate('/client');
+           navigate("/client", { state: { from: location.pathname } });
         } catch (error) {
           // catch the rejected value here
           toast.error(error || "Login failed");
@@ -45,8 +46,8 @@ function Login() {
       {/* Header */}
       <div className="header h-[40px] px-4  sm:px-10 flex justify-between items-center">
         {/* Logo - Always visible */}
-        <div className="w-1/2 flex mb-2 items-center h-full">
-          <img
+        <div className="w-1/2 flex mb-2 md:px-20">
+          {/* <img
             src="/logo/logo.png"
             alt="logo"
             className="h-full w-auto object-contain"
@@ -55,7 +56,8 @@ function Login() {
             src="/logo/title.png"
             alt="title"
             className="h-full w-auto object-contain ml-0"
-          />
+          /> */}
+          <Logo size="md" className='md'/>
         </div>
 
         {/* Welcome text - only on larger screens */}

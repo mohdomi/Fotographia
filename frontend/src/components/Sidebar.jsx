@@ -2,6 +2,7 @@ import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import Logo from './Logo';
 
+
 const Sidebar = ({ className = '' }) => {
   const navigate = useNavigate();
   const location = useLocation();

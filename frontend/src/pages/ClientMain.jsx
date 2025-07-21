@@ -21,6 +21,7 @@ const ClientMain = () => {
 
 
     // for now keeping this as the response structure will fix this afterwards.
+    
     const [categoryDetails, setCategoryDetails] = useState({
         "success": true,
         "data": [
@@ -83,7 +84,7 @@ const ClientMain = () => {
                 });
             }
         );
-    }, [categoryDetails.data.length]);
+    }, [categoryDetails.data]);
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-orange-50">
@@ -113,7 +114,7 @@ const PhotoGridUnlocked = ({ category, gridUnlock, changeInClickedLength }) => {
 
     useEffect(() => {
         changeInClickedLength(clickedLength);
-    }, [clickedLength]);
+    }, [clickedLength,changeInClickedLength]);
 
 
     return (

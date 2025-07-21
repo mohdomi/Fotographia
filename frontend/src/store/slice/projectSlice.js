@@ -1,32 +1,40 @@
 import { createSlice } from '@reduxjs/toolkit';
-
-const projectSlice = createSlice({
-  name: 'project',
+import { generateUploadUrls } from "../thunks/generateUrlThunk";
+const projectUploadSlice = createSlice({
+  name: 'projectUpload',
   initialState: {
-    weddingImages: {},
     loading: false,
-    error: null
+    success: false,
+    error: null,
+    data: null,
   },
   reducers: {
-    setWeddingImages: (state, action) => {
-      state.weddingImages = action.payload;
+    resetUploadState: (state) => {
       state.loading = false;
+      state.success = false;
       state.error = null;
+      state.data = null;
     },
-    setProjectLoading: (state, action) => {
-      state.loading = action.payload;
-    },
-    setProjectError: (state, action) => {
-      state.error = action.payload;
-      state.loading = false;
-    }
-  }
+  },
+  extraReducers: (builder) => {
+    builder
+      .addCase(generateUploadUrls.pending, (state) => {
+        state.loading = true;
+        state.success = false;
+        state.error = null;
+      })
+      .addCase(generateUploadUrls.fulfilled, (state, action) => {
+        state.loading = false;
+        state.success = true;
+        state.data = action.payload;
+      })
+      .addCase(generateUploadUrls.rejected, (state, action) => {
+        state.loading = false;
+        state.success = false;
+        state.error = action.payload?.error || 'Upload failed';
+      });
+  },
 });
 
-export const {
-  setWeddingImages,
-  setProjectLoading,
-  setProjectError
-} = projectSlice.actions;
-
-export default projectSlice.reducer;
+export const { resetUploadState } = projectUploadSlice.actions;
+export default projectUploadSlice.reducer;
