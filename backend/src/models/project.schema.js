@@ -20,7 +20,8 @@ const projectSchema = new mongoose.Schema({
     Mobile_Number: {
         type: String,
         required: true,
-        trim: true
+        trim: true,
+        unique:true
     },
     months: {
         type: Number,
@@ -40,7 +41,8 @@ const projectSchema = new mongoose.Schema({
     },
     Userpin: {
         type: String,
-        trim: true
+        trim: true,
+        unique:true
     },
     AdminUserId: [{
         type: mongoose.Schema.Types.ObjectId,

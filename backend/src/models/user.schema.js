@@ -18,6 +18,11 @@ const userSchema = new mongoose.Schema({
     ref:"AccessUser"
   }],
 
+  role: {
+    type: String,
+    enum: ['AdminUser', 'MainAdmin'],
+    default: 'AdminUser'
+  },
 	interactions: [
 		{
 			categoryId: {

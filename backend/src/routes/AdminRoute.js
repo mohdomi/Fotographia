@@ -1,5 +1,5 @@
 import Router from "express"
-import {AdminSignup,AdminSignin,createProject} from "../controllers/Admin-auth.js"
+import {AdminSignup,AdminSignin,createProject, Adminlogout} from "../controllers/Admin-auth.js"
 import authmiddleware  from "../middleware/Auth-middleware.js";
 import {generatePresignedUrls,
   handleUploadComplete,
@@ -13,13 +13,14 @@ route.post("/admsignup",AdminSignup);
 
 route.post("/admsignin",AdminSignin);
 route.post("/create-project",authmiddleware,createProject);
+route.post("/logout",authmiddleware,Adminlogout);
 
 // this route is just created for specifically toggling between aws s3 and cloudinary in future can be deleted or modified for more storage options.
 // so i have kept this temporarily.
 route.post('/set-upload-provider', setUploadProvider);
 
 // Generate pre-signed URLs for direct upload
-route.post('/generate-upload-urls', generatePresignedUrls);
+route.post('/generate-upload-urls', authmiddleware ,generatePresignedUrls);
 
 // Handle upload completion webhook  
 route.post('/upload-complete', handleUploadComplete);

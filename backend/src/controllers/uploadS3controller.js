@@ -3,13 +3,15 @@ import mongoose from 'mongoose';
 import { HeadObjectCommand } from '@aws-sdk/client-s3';
 import s3Client from '../utils/awsS3.js';
 import { createPresignedPost } from '@aws-sdk/s3-presigned-post';
+import ClientUser from '../models/user.schema.js';
 import path from 'path';
 import { v4 as uuidv4 } from 'uuid';
 import Image from '../models/image.schema.js'; // Import the Image model
 import Project from '../models/project.schema.js';
 import Category from '../models/category.schema.js';
 import { createCategoriesFromFolders,createCategoriesFromPaths,createCategoriesFromFolderNames,getLeafFolders } from '../utils/categoryCreation.js'
-
+import { calculateCountdownDuration } from '../utils/countdownUtils.js';
+import User from '../models/user.js';
 
 // this function generates the folder structure in the server or storage bucket as same as that of the user side so nested folders could be structured correctly.
 const generateFolderPath = (weddingName, subfolder = '', baseUploadId = null) => {
@@ -59,7 +61,8 @@ const validateFile = (fileInfo) => {
 
 // Generate pre-signed URLs for direct upload (enhanced version)
 
-/* this will generate a presigned url for each folder upload . 
+/** 
+ this will generate a presigned url for each folder upload . 
    a presigned url is basically a method that aws or any other cloud provider provides use
    for direct upload of our assets to the cloud this removes the hustle of flow of data through our servers
    and also is scalable as aws maintains the entire architecural flow. basically, this means that we will get a 
@@ -76,6 +79,7 @@ const validateFile = (fileInfo) => {
     so this approach with pre signed secure urls is better and ideal.
 */
 
+/** 
 const generatePresignedUrls = async (req, res) => {
   try {
     // Get upload configuration from request body (similar to first approach)
@@ -84,12 +88,16 @@ const generatePresignedUrls = async (req, res) => {
       weddingName,
       mobile_no,
       packages,
+      dueDate,
+      estimatedDays,
+      Userpin,
       preserveFolderStructure = true,
       expiresIn = 3600, // 1 hour default expiry
       uploadProvider = 's3' // Keep consistency with first approach
     } = req.body;
 
     // Comprehensive validation
+
     if (!files || !Array.isArray(files) || files.length === 0) {
       return res.status(400).json({
         success: false,
@@ -106,6 +114,7 @@ const generatePresignedUrls = async (req, res) => {
     }
 
     // we need to change this with some effiicient naming for future.
+
     const root_folder_name = weddingName.trim() + "_" + mobile_no;
 
     console.log(`Starting pre-signed URL generation for ${files.length} files to ${uploadProvider}`);
@@ -190,9 +199,9 @@ const generatePresignedUrls = async (req, res) => {
         }
 
 
-        /* so i am creating the category usign the folder structure somewhere here
-          using the end node name from the original file path.
-        */
+        //  so i am creating the category usign the folder structure somewhere here
+        //   using the end node name from the original file path.
+        
           let leafFolder = '';
           if(originalPath){
             const parts = originalPath.split('/');
@@ -259,12 +268,13 @@ const generatePresignedUrls = async (req, res) => {
         return {
           success: false,
           originalName: fileInfo.name,
-          error: error.message,
+          error:error.message,
         };
       }
     });
 
     // Wait for all URL generations to complete
+    
     const results = await Promise.all(urlPromises);
 
     // Separate successful and failed generations
@@ -295,7 +305,7 @@ const generatePresignedUrls = async (req, res) => {
     });
 
   } catch (error) {
-    console.error('Pre-signed URL generation error:', error);
+    console.error('Pre-signed URL generation error:', error.message);
     
     // Enhanced error handling (from first approach style)
     if (error.name === 'CredentialsError') {
@@ -314,15 +324,233 @@ const generatePresignedUrls = async (req, res) => {
 
     res.status(500).json({
       success: false,
-      error: 'Failed to generate pre-signed URLs',
+      error: 'Failed to generate pre-signed URLs'+error.message,
       details: process.env.NODE_ENV === 'development' ? error.message : undefined
+    });
+  }
+};
+
+*/
+
+
+
+
+
+const generatePresignedUrls = async (req, res) => {
+  const session = await mongoose.startSession(); // start DB transaction
+  session.startTransaction();
+ const id = await req.id;
+  try {
+    const {
+      files,
+      weddingName,
+      mobile_no,
+      packages,
+      dueDate,
+      estimatedDays,
+      Userpin,
+      preserveFolderStructure = true,
+      expiresIn = 3600,
+      uploadProvider = 's3'
+    } = req.body;
+ console.log(typeof estimatedDays);
+    if (!files || !Array.isArray(files) || files.length === 0) {
+      return res.status(400).json({ success: false, error: 'No files provided.' });
+    }
+
+    if (files.length > 1000) {
+      return res.status(400).json({ success: false, error: 'Too many files (max 1000).' });
+    }
+
+    const root_folder_name = weddingName.trim() + "_" + mobile_no;
+    const timestamp = Date.now();
+    const uniqueId = uuidv4().substring(0, 8);
+    const baseUploadId = `${timestamp}_${uniqueId}`;
+
+    // Create/Find Project inside transaction
+    const { months, days, hours, minutes } =  calculateCountdownDuration(dueDate, estimatedDays);
+    console.log({months,days,hours,minutes});
+    console.log(typeof weddingName, weddingName);
+console.log(typeof mobile_no, mobile_no);
+console.log(typeof Userpin, Userpin);
+      const existing = await Project.findOne({
+    wedding_name:weddingName,
+    Mobile_Number:mobile_no
+  }).session(session);
+
+  if (existing) {
+    return res.json({data:"Project already exists"});
+  }
+    const newProject =new Project({
+    wedding_name: weddingName,
+    Date: dueDate,
+    Mobile_Number: mobile_no,
+    Package: packages,
+    Userpin,
+    months,
+    days,
+    hours,
+    minutes,
+    AdminUserId: id,
+  });
+
+const project = await newProject.save({ session });
+
+  const clientUser = new ClientUser({
+    Userpin:project?.Userpin,
+    weddingId: project?._id,
+  });
+  await clientUser.save({ session });
+
+  await User.updateMany(
+    { _id: { $in: project.AdminUserId } },
+    { $push: { projects: project._id } },
+    { session }
+  );
+
+
+    const filePaths = files.map(f => f.relativePath);
+    const createdCategories = await createCategoriesFromPaths(filePaths, Category, project._id, session); // use session
+
+    // Update project with created category IDs
+    const categoryIds = createdCategories.map(cat => cat._id);
+    if (categoryIds.length > 0) {
+      await Project.findByIdAndUpdate(
+        project._id,
+        { $addToSet: { categories: { $each: categoryIds } } },
+        { new: true, session }
+      );
+    }
+
+    // Create category map for easy lookup
+    const categoryMap = {};
+    createdCategories.forEach(cat => {
+      categoryMap[cat.title] = cat._id;
+    });
+
+    // Generate presigned URLs
+    const urlPromises = files.map(async (fileInfo, index) => {
+      try {
+        const sanitizedFileName = validateFile(fileInfo);
+
+        let originalPath = '';
+        let folderPath = generateFolderPath(root_folder_name);
+        if (preserveFolderStructure && fileInfo.relativePath) {
+          originalPath = fileInfo.relativePath.includes('/') ? path.dirname(fileInfo.relativePath) : '';
+          folderPath = originalPath !== '.' ? generateFolderPath(root_folder_name, originalPath, baseUploadId) : `uploads/${root_folder_name}/${baseUploadId}`;
+        }
+
+        let leafFolder = originalPath ? originalPath.split('/').pop() : 'root';
+        const categoryObjectId = categoryMap[leafFolder];
+
+        const fileExtension = path.extname(sanitizedFileName);
+        const baseName = path.basename(sanitizedFileName, fileExtension);
+        const uniqueFileName = `${baseName}_${Date.now()}_${index}${fileExtension}`;
+        const key = `${folderPath}/${uniqueFileName}`;
+
+        const presignedPost = await createPresignedPost(s3Client, {
+          Bucket: process.env.AWS_S3_BUCKET_NAME,
+          Key: key,
+          Fields: {
+            'Content-Type': fileInfo.type,
+            'x-amz-meta-original-name': fileInfo.name,
+            'x-amz-meta-sanitized-name': sanitizedFileName,
+            'x-amz-meta-original-path': originalPath || '',
+            'x-amz-meta-upload-session': baseUploadId,
+            'x-amz-meta-uploaded-at': new Date().toISOString(),
+            'x-amz-meta-category-id': categoryObjectId?.toString() || 'categoryId',
+            'x-amz-meta-file-index': index.toString(),
+          },
+          Conditions: [
+            ['content-length-range', 0, 100 * 1024 * 1024],
+            ['eq', '$Content-Type', fileInfo.type],
+            ['starts-with', '$x-amz-meta-original-name', ''],
+          ],
+          Expires: expiresIn,
+        });
+
+        const finalUrl = `https://${process.env.AWS_S3_BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com/${key}`;
+
+        return {
+          success: true,
+          originalName: fileInfo.name,
+          sanitizedName: sanitizedFileName,
+          key,
+          uploadUrl: presignedPost.url,
+          fields: presignedPost.fields,
+          finalUrl,
+          originalPath,
+          folderPath,
+          uploadSessionId: baseUploadId,
+          size: fileInfo.size,
+          type: fileInfo.type,
+          categoryId: categoryObjectId?.toString(),
+          weddingId: project._id,
+        };
+
+      } catch (error) {
+        return {
+          success: false,
+          originalName: fileInfo.name,
+          error: error.message,
+        };
+      }
+    });
+
+    const results = await Promise.all(urlPromises);
+    const successful = results.filter(r => r.success);
+    const failed = results.filter(r => !r.success);
+
+    if (failed.length > 0) {
+      // Abort DB transaction
+      await session.abortTransaction();
+      session.endSession();
+
+      console.error('Presigned URL generation failed for some files:', failed.map(f => f.originalName));
+      return res.status(500).json({
+        success: false,
+        error: 'One or more files failed to generate pre-signed URLs. Aborting project creation.',
+        failed,
+      });
+    }
+
+    // All URLs generated successfully, commit DB transaction
+    await session.commitTransaction();
+    session.endSession();
+
+    res.json({
+      success: true,
+      message: `Pre-signed URLs generated successfully for ${successful.length} files.`,
+      uploadSessionId: baseUploadId,
+      expiresIn,
+      expiresAt: new Date(Date.now() + expiresIn * 1000).toISOString(),
+      stats: {
+        total: results.length,
+        successful: successful.length,
+        failed: failed.length,
+      },
+      data: { successful },
+      uploadProvider,
+      preserveFolderStructure,
+    });
+
+  } catch (error) {
+    await session.abortTransaction();
+    session.endSession();
+    console.error('Transaction failed:', error);
+
+    return res.status(500).json({
+      success: false,
+      error: 'Failed to generate pre-signed URLs. Transaction rolled back.',
+      details: process.env.NODE_ENV === 'development' ? error.message : undefined,
     });
   }
 };
 
 
 
-// Enhanced upload completion handler with comprehensive tracking
+
+
 const handleUploadComplete = async (req, res) => {
   try {
     const {

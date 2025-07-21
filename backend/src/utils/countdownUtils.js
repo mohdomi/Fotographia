@@ -20,6 +20,12 @@ export function calculateCountdownDuration(dueDate, estimatedDays) {
     end: startDate,
   });
 
-  const { months, days, hours, minutes } = duration;
+ const {
+  months = 0,
+  days = 0,
+  hours = 0,
+  minutes = 0
+} = duration || {};
+
   return { months, days, hours, minutes };
 }

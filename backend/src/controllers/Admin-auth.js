@@ -205,6 +205,21 @@ export const AdminSignin = async (req, res, next) => {
   }
 }
 
+export const Adminlogout = async (req, res) => {
+  try {
+    res.clearCookie("token", {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "strict",
+    });
+
+    res.status(200).json({ message: "Logout successful" });
+  } catch (error) {
+    res.status(500).json({ message: "Something went wrong during logout", error: error.message });
+  }
+};
+
+
 export const createProject = async (req, res) => {
   try {
     const id = await req.id;
@@ -221,7 +236,8 @@ export const createProject = async (req, res) => {
     if (!validatePassword(Userpin)) return res.status(400).json({ message: "weak Password" });
 
     const { months, days, hours, minutes } = calculateCountdownDuration(dueDate, estimatedDays);
-
+ console.log(months,days,hours,minutes);
+ 
     const newProject = new Projects({
       wedding_name,
       Date: dueDate,
@@ -261,3 +277,4 @@ export const createProject = async (req, res) => {
     });
   }
 };
+

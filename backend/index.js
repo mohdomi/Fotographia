@@ -6,13 +6,13 @@ import authmiddleware from "./src/middleware/Auth-middleware.js";
 import UserRoute from "./src/routes/UseRoute.js";
 import mongoose from "mongoose";
 import cors from 'cors';
-
+import Project from "./src/models/project.schema.js"
 
 const app = express();
 
 const allowedOrigins = ['http://localhost:5173'];
 app.use(cors({
-  origin: allowedOrigins,
+  origin:allowedOrigins,
   credentials: true 
 }));
 
@@ -46,6 +46,14 @@ app.get("/me" , (req,res)=>{
   res.json({
     hi : "hi there"
   })
+})
+
+
+app.get("/project",async(req,res)=>{
+ const existing = await Project.findOne({
+    wedding_name:"Hello",
+  });
+  return res.json({existing});
 })
 
 app.listen(process.env.PORT,()=>{
