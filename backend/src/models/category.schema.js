@@ -15,7 +15,7 @@ const categorySchema = new mongoose.Schema({
     //     type : Number ,
     //     required : true
     // }, // keeping this temporarily for now.
-    unlockThreshhold: { type: Number , required : true, default: 5 },
+    unlockThreshhold: { type: Number , required : true, default: 10 },
 
     images: [{
         type: mongoose.Schema.Types.ObjectId,

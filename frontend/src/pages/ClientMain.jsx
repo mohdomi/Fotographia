@@ -1,5 +1,5 @@
 import Header from "../components/Header"
-import { useEffect, useState , useMemo } from "react"
+import { useEffect, useState, useMemo } from "react"
 import instance from "../api/axios"
 
 const ClientMain = () => {
@@ -20,26 +20,26 @@ const ClientMain = () => {
     ///////////////////////////////////////////////////////////////////
     // for now keeping this as the response structure will fix this afterwards.
 
-    const [weddingId,]  = useState(()=>{
+    const [weddingId,] = useState(() => {
 
-        try{
+        try {
 
             const userString = localStorage.getItem('user');
-            if(!userString){
+            if (!userString) {
                 return "some defult value."
             }
             const userObject = JSON.parse(userString);
-            if(userObject.user && userObject.user.weddingId){
+            if (userObject.user && userObject.user.weddingId) {
                 return userObject.user.weddingId;
-            }else{
+            } else {
                 return "Default Value";
             }
-        }catch(error){
-            console.error("Local Storage Error : " , error);
+        } catch (error) {
+            console.error("Local Storage Error : ", error);
             return "Default Value";
         }
     })
-    
+
     const [categoryDetails, setCategoryDetails] = useState({
         "success": true,
         "data": [
@@ -76,6 +76,9 @@ const ClientMain = () => {
         setUnlockedIndexes(newUnlocked);
     }, [clickedImagesTracker, categoryDetails.data]);
 
+    useEffect(() => {
+        setClickedImagesTracker(Array(categoryDetails.data.length).fill(0));
+    }, [categoryDetails.data.length]);
 
 
     useEffect(() => {
@@ -87,12 +90,9 @@ const ClientMain = () => {
             console.log(response.data);
             setCategoryDetails(response.data);
         }
-        const user = localStorage.getItem('user');
-        const user2 = JSON.parse(user);
-        console.log(user2.user.weddingId);
 
         FetchImages();
-    }, [])
+    }, [weddingId])
 
     // Memoize the callback per index so its reference is stable for each PhotoGridUnlocked
     const handleClickedLengthChangeMap = useMemo(() => {
@@ -135,7 +135,7 @@ const PhotoGridUnlocked = ({ category, gridUnlock, changeInClickedLength }) => {
 
     useEffect(() => {
         changeInClickedLength(clickedLength);
-    }, [clickedLength,changeInClickedLength]);
+    }, [clickedLength, changeInClickedLength]);
 
 
     return (
@@ -145,7 +145,7 @@ const PhotoGridUnlocked = ({ category, gridUnlock, changeInClickedLength }) => {
 
         gridUnlock ?
 
-        // Photo Grid Unlocked Loigc
+            // Photo Grid Unlocked Loigc
 
             <div className="mb-8 md:mb-16 px-4 md:px-8 py-4 md:py-6 bg-white rounded-3xl shadow-sm">
                 <div className="flex flex-col md:flex-row md:items-center justify-between mb-6 md:mb-8 gap-4">
@@ -188,7 +188,7 @@ const PhotoGridUnlocked = ({ category, gridUnlock, changeInClickedLength }) => {
                 </div>
             </div>
 
-            : 
+            :
             // Photo Grid Locked Component
             <div className="mb-8 md:mb-16 px-4 md:px-8 py-4 md:py-6 bg-white rounded-3xl shadow-sm">
                 <div className="flex flex-col md:flex-row md:items-center justify-between mb-6 md:mb-8 gap-4">

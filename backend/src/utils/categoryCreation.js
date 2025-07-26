@@ -79,7 +79,7 @@ async function createCategoriesFromFolderNames(folderNames, Category, weddingId)
       try {
         const category = await Category.findOneAndUpdate(
           { weddingId: weddingId, title: folderName },
-          { $setOnInsert: { weddingId: weddingId, title: folderName, unlockThreshhold: 50 } },
+          { $setOnInsert: { weddingId: weddingId, title: folderName, unlockThreshhold: 5 } },
           { upsert: true, new: true }
         );
         console.log(`Created category: ${folderName}`);
