@@ -21,7 +21,7 @@ const projectSchema = new mongoose.Schema({
         type: String,
         required: true,
         trim: true,
-        unique:true
+        unique: true
     },
     months: {
         type: Number,
@@ -42,7 +42,7 @@ const projectSchema = new mongoose.Schema({
     Userpin: {
         type: String,
         trim: true,
-        unique:true
+        unique: true
     },
     AdminUserId: [{
         type: mongoose.Schema.Types.ObjectId,
@@ -70,7 +70,13 @@ const projectSchema = new mongoose.Schema({
     categories: [{
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Category'
-    }]
+    }],
+
+    status: {
+        type: String,
+        enum: ['pending', 'current', 'completed'],
+        default: 'pending'
+    },
 
 });
 

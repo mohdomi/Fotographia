@@ -4,6 +4,7 @@ import { useMemo,useCallback } from 'react';
 import axios from 'axios';
 import api from "../api/axios.js";
 import { Eye, EyeOff, Sparkles } from 'lucide-react';
+import { toast } from 'react-toastify';
 
 export default function NewProjectForm() {
    // --- State Management ---
@@ -29,7 +30,7 @@ export default function NewProjectForm() {
   const totalBytes = useMemo(() => filesInfo.reduce((sum, f) => sum + f.size, 0), [filesInfo]);
   const isReadyToUpload = status === 'ready';
   const isUploading = status === 'uploading';
-  // const showProgress = ['ready', 'uploading', 'complete', 'error'].includes(status);
+  const showProgress = ['ready', 'uploading', 'complete', 'error'].includes(status);
 
   // --- Utility Functions ---
   const logMessage = useCallback((message, type = 'info') => {
@@ -150,6 +151,21 @@ console.log(allFiles);
 
   // --- Core Upload Logic ---
   const handleUpload = async () => {
+
+    if(
+    !weddingName.trim() ||
+    !mobileNo.trim() ||
+    !packages.trim() ||
+    !dueDate ||
+    !Userpin.trim() ||
+    filesInfo.length === 0 ||
+    !estimatedDays ||
+    !photocount
+    ) {
+      toast.error("Please fill all required fields and select files before Uploading");
+      return;
+    }
+
     if (!isReadyToUpload) return;
 
     setStatus('uploading');
@@ -223,14 +239,14 @@ console.log(allFiles);
 
         try {
           const res = await axios.post(urlInfo.uploadUrl, formData, {
-            onUploadProgress: (progressEvent_2) => {
-              const { loaded, total } = progressEvent_2;
+            onUploadProgress: (progressEvent) => {
+              const { loaded, total } = progressEvent;
               const percentage = Math.floor((loaded * 100) / total);
 
               uploadedBytesTracker[index] = loaded;
               updateProgress();
 
-              setFilesInfo(prev_1 => prev_1.map(f_1 => f_1.id === fileInfo.id ? { ...f_1, progress: percentage } : f_1
+              setFilesInfo(prev => prev.map(f => f.id === fileInfo.id ? { ...f, progress: percentage } : f
               ));
             },
           });
@@ -352,7 +368,7 @@ console.log(filesInfo);
               type="text"
               name="weddingName"
               placeholder="Wedding-Name"
-              className="w-full py-3 px-4  rounded-lg  focus:outline-none text-base"
+              className="w-full py-3 px-4 text-black  rounded-lg  focus:outline-none text-base"
             />
           </div>
 
@@ -363,7 +379,7 @@ console.log(filesInfo);
               <select
                 onChange={(e) => setPackages(e.target.value)}
                 name="package"
-                className="w-full py-3 px-4 rounded-lg  focus:outline-none  text-base"
+                className="w-full py-3 px-4 rounded-lg text-black  focus:outline-none  text-base"
               >
                 <option value="Gold">Gold</option>
                 <option value="Silver">Silver</option>
@@ -377,7 +393,7 @@ console.log(filesInfo);
                 type="tel"
                 name="mobileNumber"
                 placeholder="Add Groom Mobile No."
-                className="w-full py-3 px-4 rounded-lg focus:outline-none text-base"
+                className="w-full text-black py-3 px-4 rounded-lg focus:outline-none text-base"
               />
             </div>
           </div>
@@ -389,7 +405,7 @@ console.log(filesInfo);
                 value={photocount}
                 onChange={()=>{}}
                 placeholder="Add Groom Mobile No."
-                className="w-full py-3 px-4 rounded-lg focus:outline-none text-base"
+                className="w-full text-black py-3 px-4 rounded-lg focus:outline-none text-base"
               />
             </div>
 
@@ -401,7 +417,7 @@ console.log(filesInfo);
     type={showPassword ? "text" : "password"}
     name="Userpin"
     placeholder="Add unique userpin"
-    className="w-full py-3 px-4 center rounded-lg focus:outline-none text-base pr-20"
+    className="w-full text-black py-3 px-4 center rounded-lg focus:outline-none text-base pr-20"
   />
   
   {/* Password visibility toggle */}
@@ -479,6 +495,22 @@ console.log(filesInfo);
             </div>
           </div>
 
+          {/* --- File Progress and Log Viewer Section --- */}
+            {showProgress && (
+                    <div className="mt-6 space-y-4">
+                        <div>
+                            <h4 className="text-md font-semibold text-gray-700 mb-3">
+                                Upload Progress
+                            </h4>
+                            <div className="space-y-2 max-h-60 overflow-y-auto p-2 bg-gray-100 rounded-lg">
+                                {filesInfo.map(fileInfo => (
+                                    <FileItem key={fileInfo.id} fileInfo={fileInfo} />
+                                ))}
+                            </div>
+                        </div>
+                    </div>
+                )}
+
           {/* Due Date & Estimated Time */}
           <div className="flex flex-col  sm:flex-row justify-between gap-6">
             <div className='w-full md:max-w-xs'>
@@ -487,7 +519,7 @@ console.log(filesInfo);
                 type="date"
                 onChange={(e)=>setDueDate(e.target.value)}
                 name="dueDate"
-                className="w-full py-3 px-4 rounded-lg  focus:outline-none text-base"
+                className="w-full text-black py-3 px-4 rounded-lg  focus:outline-none text-base"
               />
             </div>
             <div className='w-full md:max-w-xs'>
@@ -505,7 +537,7 @@ console.log(filesInfo);
                 type="number"
                 name="estimatedDays"
                 onChange={(e)=>setestimatedDays(parseInt(e.target.value) || 0)}
-                className="w-full py-3 px-4 rounded-lg  focus:outline-none text-base"
+                className="w-full text-black py-3 px-4 rounded-lg  focus:outline-none text-base"
                 placeholder='Enter estimated time (in days)'
               />
             </div>
@@ -516,7 +548,7 @@ console.log(filesInfo);
             <label className="block text-sm font-medium text-gray-700 mb-2">Terms and Conditions</label>
             <select
               name="termsConditions"
-              className="w-full py-3 px-4 rounded-lg  focus:outline-none text-base"
+              className="w-full text-black py-3 px-4 rounded-lg  focus:outline-none text-base"
             >
               <option value="">Select terms and Conditions</option>
               <option value="accepted">I accept terms and conditions</option>
@@ -545,3 +577,62 @@ console.log(filesInfo);
     </div>
   );
 }
+
+
+const FileItem = ({ fileInfo }) => {
+    const { name, relativePath, size, status, progress, errorMessage } = fileInfo;
+    const friendlySize = (size / (1024 * 1024)).toFixed(2) + ' MB';
+
+    const statusColors = {
+        pending: 'bg-gray-400',
+        uploading: 'bg-blue-500',
+        success: 'bg-green-500',
+        error: 'bg-red-500',
+    };
+    
+    const statusIcons = {
+        pending: 'pending',
+        uploading: 'uploading',
+        success: 'success',
+        error: 'error',
+    }
+
+    return (
+        <div className="p-4 bg-gray-50 rounded-lg transition-all">
+            <div className="flex items-center justify-between">
+                <div className="flex-grow mr-4 overflow-hidden">
+                    <p className="font-semibold text-gray-800 truncate">{name}</p>
+                    <p className="text-sm text-gray-500 truncate">{relativePath}</p>
+                </div>
+                <div className="flex-shrink-0 text-sm text-gray-600 mr-4">{friendlySize}</div>
+                <div title={errorMessage || status} className="flex-shrink-0 w-8 h-8 flex items-center justify-center">
+                    <Icon type={statusIcons[status]} />
+                </div>
+            </div>
+            <div className="mt-2 w-full bg-gray-200 rounded-full h-2">
+                <div 
+                    className={`h-2 rounded-full transition-all duration-300 ${statusColors[status]}`}
+                    style={{ width: `${progress}%` }}
+                ></div>
+            </div>
+        </div>
+    );
+};
+
+const Icon = ({ type, className = "w-6 h-6" }) => {
+    const icons = {
+        upload: <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" />,
+        pending: <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />,
+        uploading: <div className="spinner w-5 h-5 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>,
+        success: <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />,
+        error: <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />,
+    };
+
+    if (type === 'uploading') return icons.uploading;
+
+    return (
+        <svg className={className} xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="2" stroke="currentColor">
+            {icons[type]}
+        </svg>
+    );
+};

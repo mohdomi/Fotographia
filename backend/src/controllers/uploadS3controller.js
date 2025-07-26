@@ -1,6 +1,6 @@
 import 'dotenv/config';
 import mongoose from 'mongoose';
-import { HeadObjectCommand } from '@aws-sdk/client-s3';
+import { HeadObjectCommand , DeleteObjectCommand } from '@aws-sdk/client-s3';
 import s3Client from '../utils/awsS3.js';
 import { createPresignedPost } from '@aws-sdk/s3-presigned-post';
 import ClientUser from '../models/user.schema.js';
@@ -795,7 +795,23 @@ const setUploadProvider = (req, res) => {
 // Enhanced file deletion function
 const deleteUploadedFiles = async (req, res) => {
   try {
-    const { keys } = req.body; // Array of S3 keys to delete
+
+    const {weddingId} = req.body;
+
+    const weddingImages = await Image.find({
+      weddingId : weddingId
+    }).lean();
+
+    if(!weddingImages || weddingImages.length === 0) {
+      return res.status(400).json({
+        success : false , 
+        error : "No Images for this weddingId"
+      })
+    }
+
+    const keys = weddingImages.map((img) => (img.key))
+
+    console.log(keys);
 
     if (!keys || !Array.isArray(keys) || keys.length === 0) {
       return res.status(400).json({
@@ -803,9 +819,6 @@ const deleteUploadedFiles = async (req, res) => {
         error: 'No keys provided for deletion'
       });
     }
-
-    // Implementation would go here for batch deletion
-    /*
     const deleteResults = await Promise.all(
       keys.map(async (key) => {
         try {
@@ -819,12 +832,13 @@ const deleteUploadedFiles = async (req, res) => {
         }
       })
     );
-    */
-
+    await Image.deleteMany({ weddingId });
+    await Category.deleteMany({ weddingId });
+    await Project.deleteOne({ _id: weddingId });
     res.json({
       success: true,
       message: `Deletion request processed for ${keys.length} files`,
-      // results: deleteResults
+      results: deleteResults
     });
 
   } catch (error) {

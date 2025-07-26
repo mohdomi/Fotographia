@@ -18,12 +18,7 @@ function App() {
     <Router>
       <Routes>
         <Route path="/" element={<Login />} />
-        {/* writing these outside for omair */}
-        {/* <Route path="/omair_dashboard" element={<Dashboard />}></Route> */}
-        <Route path="/omair_client" element={<ClientMain />} />
-        
-   
-
+           
         <Route element={<ProtectedForAdmin />}>
           <Route
             path="/dashboard"

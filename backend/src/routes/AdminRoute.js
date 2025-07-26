@@ -5,8 +5,8 @@ import {generatePresignedUrls,
   handleUploadComplete,
   getUploadStatus,
   setUploadProvider,
-  deleteUploadedFiles} from '../controllers/uploadS3controller.js'
-
+  deleteUploadedFiles} from '../controllers/uploadS3controller.js';
+import { getAllProjects } from "../controllers/adminDashboardControllers.js";
 const route= Router();
 
 route.post("/admsignup",AdminSignup);
@@ -14,6 +14,11 @@ route.post("/admsignup",AdminSignup);
 route.post("/admsignin",AdminSignin);
 route.post("/create-project",authmiddleware,createProject);
 route.post("/logout",authmiddleware,Adminlogout);
+
+
+// Admin Dashboard Routes
+route.get('/all-projects', authmiddleware , getAllProjects)
+
 
 // this route is just created for specifically toggling between aws s3 and cloudinary in future can be deleted or modified for more storage options.
 // so i have kept this temporarily.
@@ -27,8 +32,6 @@ route.post('/upload-complete', handleUploadComplete);
 
 // Get upload session status
 route.get('/upload-status/:uploadSessionId', getUploadStatus);
-
-// Set upload provider
 
 // Delete uploaded files
 route.delete('/delete-files', deleteUploadedFiles);

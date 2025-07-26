@@ -3,31 +3,40 @@ import { useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import { toast } from 'react-toastify';
 import { AdminlogoutThunk } from '../store/thunks/authThunk';
-AdminlogoutThunk
-export default function SidebarMenu() {
+
+export default function SidebarMenu({ currentSection, onSectionChange }) {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   //Logout Admin //
-  const handleLogout = async() => {
-
+  const handleLogout = async () => {
     try {
-        const res= await dispatch(AdminlogoutThunk()).unwrap();
-           toast.success(`${res?.message}`);
-         navigate("/", { state: { from: location.pathname } });
+      const res = await dispatch(AdminlogoutThunk()).unwrap();
+      toast.success(`${res?.message}`);
+      navigate("/", { state: { from: location.pathname } });
     } catch (error) {
-        toast.error(`${error?.message}` || "Logout not performed!");
+      toast.error(`${error?.message}` || "Logout not performed!");
     }
   };
 
+  const sections = ['dashboard', 'pending', 'current', 'completed'];
   return (
     <ul className="space-y-4">
-      {['Dashboard', 'Settings', 'Profile', 'Logout'].map((label) => (
-        <li key={label} className="flex items-center gap-3 cursor-pointer hover:text-indigo-600 text-gray-700">
-          <LayoutDashboard className="w-5 h-5"/>
-          {label==='Logout'? <button onClick={handleLogout}>{label}</button>: <a href={`/${label}`} className='outline-none'>{label}</a>
-          }
+      {sections.map((label) => (
+        <li
+          key={label}
+          className={`flex items-center gap-3 cursor-pointer hover:text-indigo-600 text-gray-700 ${currentSection === label ? 'font- text-indigo-600' : ''}`}
+          onClick={() => onSectionChange(label)}
+        >
+          <LayoutDashboard className="w-5 h-5" />
+          <span className="capitalize">{label}</span>
         </li>
       ))}
+      <li>
+        <button className="flex items-center gap-3 cursor-pointer hover:text-indigo-600 text-gray-700" onClick={handleLogout}>
+          <LayoutDashboard className="w-5 h-5" />
+          <span>Logout</span>
+          </button>
+      </li>
     </ul>
   );
 }

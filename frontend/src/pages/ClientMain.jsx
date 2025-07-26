@@ -1,6 +1,6 @@
 import Header from "../components/Header"
 import { useEffect, useState , useMemo } from "react"
-import axios from "axios"
+import instance from "../api/axios"
 
 const ClientMain = () => {
 
@@ -16,11 +16,29 @@ const ClientMain = () => {
     */
 
     //////////////////////////////////////////////////////////////////
-    const weddingId = "6873f83493cb218de9046999"; // fix this
+    // const weddingId = "6884b6791033db2946746dfa"; // fix this
     ///////////////////////////////////////////////////////////////////
-
-
     // for now keeping this as the response structure will fix this afterwards.
+
+    const [weddingId,]  = useState(()=>{
+
+        try{
+
+            const userString = localStorage.getItem('user');
+            if(!userString){
+                return "some defult value."
+            }
+            const userObject = JSON.parse(userString);
+            if(userObject.user && userObject.user.weddingId){
+                return userObject.user.weddingId;
+            }else{
+                return "Default Value";
+            }
+        }catch(error){
+            console.error("Local Storage Error : " , error);
+            return "Default Value";
+        }
+    })
     
     const [categoryDetails, setCategoryDetails] = useState({
         "success": true,
@@ -63,12 +81,15 @@ const ClientMain = () => {
     useEffect(() => {
 
         async function FetchImages() {
-            const response = await axios.post('http://localhost:8000/api/v1/user/fetch_presigned_urls', {
+            const response = await instance.post('/api/v1/user/fetch_presigned_urls', {
                 weddingId
             })
             console.log(response.data);
             setCategoryDetails(response.data);
         }
+        const user = localStorage.getItem('user');
+        const user2 = JSON.parse(user);
+        console.log(user2.user.weddingId);
 
         FetchImages();
     }, [])

@@ -1,5 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
+import { Pencil , Trash2 } from 'lucide-react';
+import instance from '../api/axios';
 
 const pkgColor = {
   Gold: '#FFD700',
@@ -10,9 +12,24 @@ const pkgColor = {
 const ProjectTable = ({ title, projects, onDelete }) => {
   const navigate = useNavigate();
 
-  const handleDelete = (index) => {
+  const handleDelete = async (index) => {
+    const project = projects[index];
+    if (!project || !project._id) {
+      alert('Project ID not found.');
+      return;
+    }
     if (window.confirm('Are you sure you want to delete this project?')) {
-      onDelete(index);
+      try {
+        await instance.delete('/api/v1/admin/delete-files', {
+          data: { weddingId: project._id }
+        });
+        if (typeof onDelete === 'function') {
+          onDelete(index);
+        }
+      } catch (err) {
+        console.error("Error while deleting : " , err);
+        alert('Failed to delete project.');
+      }
     }
   };
 
@@ -46,24 +63,24 @@ const ProjectTable = ({ title, projects, onDelete }) => {
               <div key={i} className={`p-4 border-b border-gray-200 ${i % 2 === 1 ? 'bg-[#fafafa]' : ''}`}>
                 <div className="flex justify-between items-start mb-2">
                   <div className="flex-1">
-                    <div className="font-bold text-sm">{p.name}</div>
+                    <div className="font-bold text-sm">{p.wedding_name}</div>
                     <div className="text-xs text-gray-600 mt-1">#{(i + 1).toString().padStart(2, '0')}</div>
                   </div>
                   <div className="flex gap-2">
-                    <span className="cursor-pointer text-base text-[#222]" title="Edit">✏️</span>
+                    <span className="cursor-pointer size-fit text-base text-[#222]" title="Edit"><Pencil className="size-5"></Pencil></span>
                     <span 
                       className="cursor-pointer text-base text-[#e74c3c]" 
                       title="Delete"
                       onClick={() => handleDelete(i)}
                     >
-                      🗑️
+                      <Trash2 size={20} color="#ff0019" strokeWidth={1.25} />
                     </span>
                   </div>
                 </div>
                 <div className="grid grid-cols-2 gap-2 text-xs">
                   <div>
                     <span className="text-gray-500">Package: </span>
-                    <span style={{ color: pkgColor[p.pkg] || '#222', fontWeight: 600 }}>{p.pkg}</span>
+                    <span style={{ color: pkgColor[p.Package] || '#222', fontWeight: 600 }}>{p.Package}</span>
                   </div>
                   <div>
                     <span className="text-gray-500">Date: </span>
@@ -71,7 +88,7 @@ const ProjectTable = ({ title, projects, onDelete }) => {
                   </div>
                   <div className="col-span-2">
                     <span className="text-gray-500">Mobile: </span>
-                    <span>{p.mobile}</span>
+                    <span>{p.Mobile_Number}</span>
                   </div>
                 </div>
               </div>
@@ -94,18 +111,18 @@ const ProjectTable = ({ title, projects, onDelete }) => {
               {projects.map((p, i) => (
                 <tr key={i} className={`${i % 2 === 1 ? 'bg-[#fafafa]' : ''}`}>
                   <td className="py-3 px-[10px]">{(i + 1).toString().padStart(2, '0')}</td>
-                  <td className="py-3 px-[10px]"><b>{p.name}</b></td>
-                  <td className="py-3 px-[10px]" style={{ color: pkgColor[p.pkg] || '#222', fontWeight: 600 }}>{p.pkg}</td>
+                  <td className="py-3 px-[10px]"><b>{p.wedding_name}</b></td>
+                  <td className="py-3 px-[10px]" style={{ color: pkgColor[p.Package] || '#222', fontWeight: 600 }}>{p.Package}</td>
                   <td className="py-3 px-[10px]">{p.date}</td>
-                  <td className="py-3 px-[10px]">{p.mobile}</td>
-                  <td className="py-3 px-[10px]">
-                    <span className="cursor-pointer mr-2 text-[1.1rem] text-[#222]" title="Edit">✏️</span>
+                  <td className="py-3 px-[10px]">{p.Mobile_Number}</td>
+                  <td className="py-3 px-[10px] flex gap-3">
+                    <span className="cursor-pointer mr-2 text-[1.1rem] text-[#222]" title="Edit"><Pencil className="size-5"></Pencil></span>
                     <span 
                       className="cursor-pointer text-[1.1rem] text-[#e74c3c]" 
                       title="Delete"
                       onClick={() => handleDelete(i)}
                     >
-                      🗑️
+                      <Trash2 size={20} color="#ff0019" strokeWidth={1.25} />
                     </span>
                   </td>
                 </tr>
